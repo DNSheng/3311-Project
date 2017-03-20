@@ -6,8 +6,10 @@ TODO:
 
 	Finish printing queries and sorting
 		- Sort either before printing or after every entry
-		- Normally print by sorted user_id
-		- List commands print sorted by user_name
+		- Normally print by ID
+		- List commands print sorted by Name
+	
+	Contract checks (require, ensure) for every feature/command
 
 	Acceptance Tests (To be done later)
 

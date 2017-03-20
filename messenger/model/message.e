@@ -25,5 +25,21 @@ feature {MESSAGE} -- Attributes
 	message_sender:		INTEGER_64
 	message_content:	STRING
 
+feature {MESSENGER}
+
+	get_message_group: INTEGER_64
+	do
+		Result := message_group
+	end
+
+	get_message_sender: INTEGER_64
+	do
+		Result := message_sender
+	end
+
+	get_message_content: STRING
+	do
+		Result := message_content
+	end
 
 end

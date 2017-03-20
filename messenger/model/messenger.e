@@ -86,6 +86,14 @@ feature
 		do
 			get_group (a_gid).register_user (a_uid)
 			get_user (a_uid).add_membership (a_gid)
+			-- Add messages from that group to the user
+			across
+				message_list as msg
+			loop
+				if msg.item.get_message_group = a_gid then
+					get_user (a_uid).add_message (msg.key)
+				end
+			end
 		end
 
 	send_message (a_uid, a_gid: INTEGER_64; a_txt: STRING)
@@ -94,6 +102,9 @@ feature
 		do
 			create l_message.make (a_uid, a_gid, a_txt)
 			message_list.force (l_message, message_list_key)
+			get_user (a_uid).add_message (message_list_key)
+			get_user (a_uid).read_message (message_list_key)
+
 			message_list_key := message_list_key + 1
 		end
 
@@ -174,8 +185,8 @@ feature -- Visible Printing Commands
 			when 12 then error_message := "Message with this ID not found in old/read messages."
 			when 13 then error_message := "Message length must be greater than zero."
 		end
-		print_state	:= 2
-		status_message	:= "ERROR"
+		print_state			:= 2
+		status_message		:= "ERROR"
 	end
 
 feature -- Visible Printing Queries
@@ -280,28 +291,76 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 						end
 						l_group_print_count := l_group_print_count - 1
 					end
+					Result.append ("%N")
 				end
 			end
-			Result.append ("%N")
 		end
 	end
 
 	print_all_messages: STRING
+		-- Sorted by default, given how we assign messages IDs based on HASH_TABLE key
+	local
+		l_string: STRING
 	do
 		create Result.make_from_string("  ")
 		Result.append ("All messages:%N")
-		if message_list.count /= 0 then
+		if message_list.count > 0 then
+			across
+				message_list as msg
+			loop
+				Result.append ("      ")
+				Result.append (msg.key.out)
+				Result.append ("->[sender: ")
+				Result.append (msg.item.get_message_sender.out)
+				Result.append (", group: ")
+				Result.append (msg.item.get_message_group.out)
+				Result.append (", content: %"")
+
+				l_string := msg.item.get_message_content
+
+				if l_string.count <= preview_length then
+					Result.append (l_string)
+				else
+					Result.append (l_string.substring(1,preview_length.as_integer_32))
+					Result.append ("...")
+				end
+
+				Result.append ("%"]%N")
+			end
 		end
-		-- Print
 	end
 
 	print_message_state: STRING
+	local
+		l_mid: INTEGER_64
 	do
 		create Result.make_from_string("  ")
 		Result.append ("Message state:%N")
-		if user_list.count /= 0 then
+		if user_list.count > 0 and message_list.count > 0 then
+			across
+				message_list as msg
+			loop
+				l_mid := msg.key
+				across
+					user_list as user
+				loop
+					Result.append ("      (")
+					Result.append (user.item.get_id.out)
+					Result.append (", ")
+					Result.append (l_mid.out)
+					Result.append (")->")
+
+					if user.item.message_was_read (l_mid) then
+						Result.append ("read")
+					elseif user.item.has_message (l_mid) then
+						Result.append ("unread")
+					else
+						Result.append ("unavailable")
+					end
+					Result.append ("%N")
+				end
+			end
 		end
-		-- Print based on preview_length var
 	end
 
 feature {MESSENGER} -- Main Printing Queries
@@ -341,8 +400,18 @@ feature {MESSENGER} -- Main Printing Queries
 			Result.append ("%N")
 			-- Alphabetically sorted
 			if user_list.count > 0 then
-				-- Sort and list
-				Result.append ("")
+				-- SORTING 																		TODO
+
+				-- LISTING
+				across
+					user_list as user
+				loop
+					Result.append ("  ")
+					Result.append (user.item.get_id.out)
+					Result.append ("->")
+					Result.append (user.item.get_name)
+					Result.append ("%N")
+				end
 			else
 				Result.append ("  There are no users registered in the system yet.%N")
 			end
@@ -355,8 +424,18 @@ feature {MESSENGER} -- Main Printing Queries
 			Result.append ("%N")
 			-- Alphabetically sorted
 			if group_list.count > 0 then
-				-- Sort and list
-				Result.append ("")
+				-- SORTING 																		TODO
+
+				-- LISTING
+				across
+					group_list as group
+				loop
+					Result.append ("  ")
+					Result.append (group.item.get_id.out)
+					Result.append ("->")
+					Result.append (group.item.get_name)
+					Result.append ("%N")
+				end
 			else
 				Result.append ("  There are no groups registered in the system yet.%N")
 			end
@@ -506,7 +585,7 @@ feature {ETF_COMMAND}
 
 	appropriate_msg_length (a_message: STRING): BOOLEAN
 	do
-		Result := a_message.count.is_greater (0)
+		Result := a_message.count > 0
 	end
 
 end
