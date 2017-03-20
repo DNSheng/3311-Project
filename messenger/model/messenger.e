@@ -130,11 +130,13 @@ feature
 
 	list_new_messages (a_uid: INTEGER_64)
 		do
+			list_user_id := a_uid
 			print_state := 4
 		end
 
 	list_old_messages (a_uid: INTEGER_64)
 		do
+			list_user_id := a_uid
 			print_state := 5
 		end
 
@@ -154,12 +156,14 @@ feature {MESSENGER} -- Printing Attributes
 	print_state:				INTEGER_64
 	status_counter:				INTEGER_64
 	preview_length:				INTEGER_64
+	list_user_id:				INTEGER_64
 
 feature {MESSENGER} -- Printing Commands
 
 	internal_reset
 	do
 		print_state 		:= 1
+		list_user_id		:= 0
 		error_message		:= ""
 		status_message		:= "OK"
 		status_counter		:= status_counter + 1
@@ -299,8 +303,6 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 
 	print_all_messages: STRING
 		-- Sorted by default, given how we assign messages IDs based on HASH_TABLE key
-	local
-		l_string: STRING
 	do
 		create Result.make_from_string("  ")
 		Result.append ("All messages:%N")
@@ -308,24 +310,7 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 			across
 				message_list as msg
 			loop
-				Result.append ("      ")
-				Result.append (msg.key.out)
-				Result.append ("->[sender: ")
-				Result.append (msg.item.get_message_sender.out)
-				Result.append (", group: ")
-				Result.append (msg.item.get_message_group.out)
-				Result.append (", content: %"")
-
-				l_string := msg.item.get_message_content
-
-				if l_string.count <= preview_length then
-					Result.append (l_string)
-				else
-					Result.append (l_string.substring(1,preview_length.as_integer_32))
-					Result.append ("...")
-				end
-
-				Result.append ("%"]%N")
+				Result.append (print_message (msg.key, msg.item))
 			end
 		end
 	end
@@ -361,6 +346,31 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 				end
 			end
 		end
+	end
+
+	print_message (a_mid: INTEGER_64; a_msg: MESSAGE): STRING
+	local
+		l_string: STRING
+	do
+		create Result.make_empty
+		Result.append ("      ")
+		Result.append (a_mid.out)
+		Result.append ("->[sender: ")
+		Result.append (a_msg.get_message_sender.out)
+		Result.append (", group: ")
+		Result.append (a_msg.get_message_group.out)
+		Result.append (", content: %"")
+
+		l_string := a_msg.get_message_content
+
+		if l_string.count <= preview_length then
+			Result.append (l_string)
+		else
+			Result.append (l_string.substring(1,preview_length.as_integer_32))
+			Result.append ("...")
+		end
+
+		Result.append ("%"]%N")
 	end
 
 feature {MESSENGER} -- Main Printing Queries
@@ -442,22 +452,44 @@ feature {MESSENGER} -- Main Printing Queries
 		end
 
 	print_list_new_messages: STRING
+		local
+			l_user: USER
 		do
 			create Result.make_empty
---			if  then
+			Result.append (print_status_message)
+			Result.append ("%N")
 
---			else
---				Result.append ("There are no new messages for this user.")
---			end
+			l_user := get_user (list_user_id)
+
+			if l_user.has_new_messages then
+				Result.append ("New/unread messages for user [")
+				Result.append (list_user_id.out)
+				Result.append (", ")
+				Result.append (l_user.get_name)
+				Result.append ("]:%N")
+
+				across																	-- TODO
+					l_user.get_user_messages as msg
+				loop
+					if msg.item ~ "unread" then
+--						Result.append (print_message (msg.key, message_list.at (msg.key)))
+					end
+				end
+
+			else
+				Result.append ("There are no new messages for this user.%N")
+			end
 		end
 
 	print_list_old_messages: STRING
 		do
 			create Result.make_empty
+			Result.append (print_status_message)
+			Result.append ("%N")
 --			if  then
 
 --			else
---				Result.append ("There are no old messages for this user.")
+--				Result.append ("There are no old messages for this user.%N")
 --			end
 		end
 

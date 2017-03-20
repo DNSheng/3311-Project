@@ -57,9 +57,19 @@ feature {MESSENGER} -- Defensive Export Queries
 					  user_messages.at (a_mid) ~ "unread"
 		end
 
+	has_new_messages: BOOLEAN
+		do
+			Result := across user_messages as msg some msg.item ~ "unread" end
+		end
+
 	get_memberships: LIST[INTEGER_64]
 		do
 			Result := membership
+		end
+
+	get_user_messages: HASH_TABLE[STRING, INTEGER_64]
+		do
+			Result := user_messages
 		end
 
 	membership_count: INTEGER
