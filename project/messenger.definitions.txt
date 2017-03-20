@@ -1,0 +1,71 @@
+system messenger
+---------------------------------------------------------------------
+  -- Secure Messenger system specifications:
+
+  -- Users may become members of any number of groups
+
+  -- Users may send messages only to the members of a group 
+  --   they are registered in.
+  -- Users may only access/read a message from a group 
+  --   they are registered in.
+  -- Once a message is read by the recipient, its status changes 
+  --   from new to old.
+  -- Users may delete their old messages.
+
+  -- The system provides the following queries: 
+  -- List of users (ID -> name) and list of groups (ID -> name), 
+  --   both sorted by name.
+
+  -- Components of the abstract state are always sorted by ID,
+  --   except for list of users, or lists of groups (as above).
+  -- Lists of new and old messages for a user, 
+  --  are sorted by message ID.
+
+  -- Message State is part of the abstract state, displayed
+  --  in pairs: (UID,MID) -> state
+  --  where state is read, unread, or unavailable
+
+  -- Each user command shall be followed by the abstract state space.
+  -- Queries shall display results only, not the abstract state.
+ 
+---------------------------------------------------------------------
+-- Secure Messenger system Types
+---------------------------------------------------------------------
+
+type GID   = INT    -- group id
+type UID   = INT    -- user id
+type MID   = INT    -- message id
+type USER  = STRING -- user name
+type GROUP = STRING -- group name
+type TEXT  = STRING -- message body
+
+---------------------------------------------------------------------
+-- Secure Messenger User Commands
+---------------------------------------------------------------------
+add_user (uid: UID; user_name: USER)			        
+                    -- add a new user to the system
+add_group (gid: GID; group_name: GROUP)		        
+                    -- add a new group to the system	
+register_user (uid: UID; gid: GID)				        
+                    -- register a user in a group
+send_message (uid: UID; gid: GID; txt: TEXT)			
+                    -- user sends a message to the group members
+read_message (uid: UID; mid: MID)				        
+                    -- user reads a new message
+delete_message (uid: UID; mid: MID)				      
+                    -- user deletes an old/read message
+set_message_preview	(n: INTEGER)		
+                    -- sets length (characters) for message preview
+                    -- default is 15
+
+---------------------------------------------------------------------
+-- Secure Messenger Queries
+---------------------------------------------------------------------
+list_new_messages (uid: UID)					
+                   -- list user's new messages	
+list_old_messages (uid: UID)					
+                   -- list user's old/read message
+list_groups								
+                   -- list all groups in alphabetical order
+list_users								
+                   -- list all users in alphabetical order

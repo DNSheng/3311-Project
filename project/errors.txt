@@ -1,0 +1,79 @@
+----Status Messages for Secure Messenger system project-------------
+-- The order of error checking on the arguments of input commands 
+-- decreases from high precedence at the top to low at the bottom. 
+-- Only the first error, in precedence order, is reported 
+-- to the user at the output. If the above errors are not present, 
+-- then the status message displays as "OK".
+-- Each error message starts with the status message "ERROR" (see at1.expected.txt)
+-- Please comment at the forum if any error messages are omitted.
+--------------------------------------------------------------------
+
+--Commands:
+
+add_user (uid: UID; user_name: USER)
+    ID must be a positive integer.
+    ID already in use.	
+    User name must start with a letter.	
+	
+add_group (gid: GID; group_name: GROUP)
+    ID must be a positive integer.
+    ID already in use.	
+    Group name must start with a letter.
+				
+register_user (uid: UID; gid: GID)
+    ID must be a positive integer.
+    User with this ID does not exist.
+    Group with this ID does not exist.
+    This registration already exists.
+				
+send_message (uid: UID; gid: GID; txt: TEXT)
+    ID must be a positive integer.
+    User with this ID does not exist.
+    Group with this ID does not exist.
+    A message may not be an empty string.
+    User not authorized to send messages to the specified group.
+			
+read_message (uid: UID; mid: MID)
+    ID must be a positive integer.
+    User with this ID does not exist.
+    Message with this ID does not exist.
+    User not authorized to access this message.
+    Message has already been read. See `list_old_messages'.
+				
+delete_message (uid: UID; mid: MID)				
+    ID must be a positive integer.
+    User with this ID does not exist.
+    Message with this ID does not exist.
+    Message with this ID not found in old/read messages.
+
+set_message_preview (n: INTEGER)	
+    Message length must be greater than zero.
+
+
+--Queries:
+
+list_new_messages (uid: UID)
+    ID must be a positive integer.
+    User with this ID does not exist.
+    -- returns a warning if no new messages are found
+    -- "There are no new messages for this user."
+    -- see at1.expected.txt
+					
+list_old_messages (uid: UID)
+    ID must be a positive integer.
+    User with this ID does not exist.
+    -- returns a warning if no old messages are found
+    -- "There are no old messages for this user."
+    -- see at1.expected.txt
+
+
+list_groups								
+list_users
+    -- these 2 queries do not have error conditions
+    -- but do return warnings
+    -- "There are no groups registered in the system yet."
+    -- or "There are no users registered in the system yet."
+    -- see at1.expected.txt
+
+
+
