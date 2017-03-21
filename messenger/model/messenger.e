@@ -87,11 +87,14 @@ feature
 			get_group (a_gid).register_user (a_uid)
 			get_user (a_uid).add_membership (a_gid)
 			-- Add messages from that group to the user
+			-- Nevermind, user should not receive access to old messages
 			across
 				message_list as msg
 			loop
 				if msg.item.get_message_group = a_gid then
 					get_user (a_uid).add_message (msg.key)
+					-- Workaround
+					get_user (a_uid).delete_message (msg.key)
 				end
 			end
 		end
@@ -277,7 +280,7 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 				user_list as user
 			loop
 				-- Print for users that are group members
-				if user.item.membership_count > 0 then		
+				if user.item.membership_count > 0 then
 					l_group_print_count := user.item.membership_count
 					Result.append ("      [")
 					Result.append (user.key.out)
@@ -359,7 +362,7 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 		Result.append (a_name)
 		Result.append ("%N")
 	end
-	
+
 	print_message (a_mid: INTEGER_64; a_msg: MESSAGE): STRING
 	local
 		l_string: STRING
@@ -459,7 +462,7 @@ feature {MESSENGER} -- Main Printing Queries
 			l_user := get_user (list_user_id)
 
 			if l_user.has_new_messages then
-				Result.append ("New/unread messages for user [")
+				Result.append ("  New/unread messages for user [")
 				Result.append (list_user_id.out)
 				Result.append (", ")
 				Result.append (l_user.get_name)
@@ -469,7 +472,6 @@ feature {MESSENGER} -- Main Printing Queries
 					l_user.get_user_messages as msg
 				loop
 					if msg.item ~ "unread" then
-						-- Check this line for correctness (written without IDE)
 						Result.append (print_message (msg.key, get_message (msg.key)))
 					end
 				end
@@ -484,16 +486,16 @@ feature {MESSENGER} -- Main Printing Queries
 			l_user: USER
 		do
 			create Result.make_from_string (print_status_message)
-			
+
 			l_user := get_user (list_user_id)
-			
+
 			if l_user.has_old_messages then
-				Result.append ("Old/read messages for user [")
+				Result.append ("  Old/read messages for user [")
 				Result.append (list_user_id.out)
 				Result.append (", ")
 				Result.append (l_user.get_name)
 				Result.append ("]:%N")
-				
+
 				across
 					l_user.get_user_messages as msg
 				loop
@@ -545,13 +547,13 @@ feature {MESSENGER}
 
 			Result := l_group
 		end
-	
+
 	get_message (a_mid: INTEGER_64): MESSAGE
 		local
 			l_message: MESSAGE
 		do
 			create l_message.make (0, 0, "")	-- VEVI Compiler
-			
+
 			across
 				message_list as msg
 			loop
@@ -559,7 +561,7 @@ feature {MESSENGER}
 					l_message := msg.item
 				end
 			end
-			
+
 			Result := l_message
 		end
 
