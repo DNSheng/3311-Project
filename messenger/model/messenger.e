@@ -242,6 +242,7 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 				user_list as user
 			loop
 				l_user := user.item
+				Result.append ("    ")
 				Result.append (print_id_name (l_user.get_id, l_user.get_name))
 			end
 		end
@@ -258,6 +259,7 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 				group_list as group
 			loop
 				l_group := group.item
+				Result.append ("    ")
 				Result.append (print_id_name (l_group.get_id, l_group.get_name))
 			end
 		end
@@ -350,8 +352,8 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 
 	print_id_name (a_id: INTEGER_64; a_name: STRING): STRING
 	do
-		create Result.make_empty
-		Result.append ("      ")
+		create Result.make_empty		-- Instead of make_empty, just make ("  ")
+		Result.append ("  ")
 		Result.append (a_id.out)
 		Result.append ("->")
 		Result.append (a_name)
@@ -362,7 +364,7 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 	local
 		l_string: STRING
 	do
-		create Result.make_empty
+		create Result.make_empty		-- Instead of make_empty, just make ("      ")
 		Result.append ("      ")
 		Result.append (a_mid.out)
 		Result.append ("->[sender: ")
@@ -414,6 +416,8 @@ feature {MESSENGER} -- Main Printing Queries
 		end
 
 	print_list_users: STRING
+		local
+			l_user: USER
 		do
 			create Result.make_empty
 			Result.append (print_status_message)
@@ -426,11 +430,8 @@ feature {MESSENGER} -- Main Printing Queries
 				across
 					user_list as user
 				loop
-					Result.append ("  ")
-					Result.append (user.item.get_id.out)
-					Result.append ("->")
-					Result.append (user.item.get_name)
-					Result.append ("%N")
+					l_user := user.item
+					Result.append (print_id_name (l_user.get_id, l_user.get_name))
 				end
 			else
 				Result.append ("  There are no users registered in the system yet.%N")
@@ -438,6 +439,8 @@ feature {MESSENGER} -- Main Printing Queries
 		end
 
 	print_list_groups: STRING
+		local
+			l_group: GROUP
 		do
 			create Result.make_empty
 			Result.append (print_status_message)
@@ -450,11 +453,8 @@ feature {MESSENGER} -- Main Printing Queries
 				across
 					group_list as group
 				loop
-					Result.append ("  ")
-					Result.append (group.item.get_id.out)
-					Result.append ("->")
-					Result.append (group.item.get_name)
-					Result.append ("%N")
+					l_group := group.item
+					Result.append (print_id_name (l_group.get_id, l_group.get_name))
 				end
 			else
 				Result.append ("  There are no groups registered in the system yet.%N")
