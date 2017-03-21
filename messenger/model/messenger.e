@@ -480,13 +480,30 @@ feature {MESSENGER} -- Main Printing Queries
 		end
 
 	print_list_old_messages: STRING
+		local
+			l_user: USER
 		do
 			create Result.make_from_string (print_status_message)
---			if  then
-
---			else
---				Result.append ("There are no old messages for this user.%N")
---			end
+			
+			l_user := get_user (list_user_id)
+			
+			if l_user.has_old_messages then
+				Result.append ("Old/read messages for user [")
+				Result.append (list_user_id.out)
+				Result.append (", ")
+				Result.append (l_user.get_name)
+				Result.append ("]:%N")
+				
+				across
+					l_user.get_user_messages as msg
+				loop
+					if msg.item ~ "read" then
+						Result.append (print_message (msg.key, get_message (msg.key)))
+					end
+				end
+			else
+				Result.append ("There are no old messages for this user.%N")
+			end
 		end
 
 ------------------------------------------------------------------------
