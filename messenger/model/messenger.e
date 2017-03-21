@@ -1,5 +1,5 @@
 note
-	description: "A default business model."
+	description: "Stores users, groups, messages. Handles commands. Prints."
 	author: "DNSheng"
 	date: "$Date$"
 	revision: "$Revision$"
@@ -24,11 +24,11 @@ feature {NONE}
 	make
 		do
 			-- Printing Attributes
-			status_counter			:= 0
-			print_state				:= 0
-			preview_length			:= 15
-			status_message			:= "OK"
-			error_message			:= ""
+			status_counter		:= 0
+			print_state		:= 0
+			preview_length		:= 15
+			status_message		:= "OK"
+			error_message		:= ""
 
 			-- Model attributes
 			user_list_key		:= 1
@@ -44,10 +44,10 @@ feature {NONE}
 --ATTRIBUTES
 ------------------------------------------------------------------------
 
-feature
+feature {MESSENGER}
 
-	user_list:				HASH_TABLE[USER, INTEGER_64]
-	group_list:				HASH_TABLE[GROUP, INTEGER_64]
+	user_list:			HASH_TABLE[USER, INTEGER_64]
+	group_list:			HASH_TABLE[GROUP, INTEGER_64]
 	message_list:			HASH_TABLE[MESSAGE, INTEGER_64]
 	user_list_key:			INTEGER_64
 	group_list_key:			INTEGER_64
@@ -189,7 +189,7 @@ feature -- Visible Printing Commands
 			when 12 then error_message := "Message with this ID not found in old/read messages."
 			when 13 then error_message := "Message length must be greater than zero."
 		end
-		print_state			:= 2
+		print_state		:= 2
 		status_message		:= "ERROR"
 	end
 
@@ -232,6 +232,8 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 	end
 
 	print_users: STRING
+	local
+		l_user: USER
 	do
 		create Result.make_from_string("  ")
 		Result.append ("Users:%N")
@@ -239,16 +241,15 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 			across
 				user_list as user
 			loop
-				Result.append ("      ")
-				Result.append (user.item.get_id.out)
-				Result.append ("->")
-				Result.append (user.item.get_name)
-				Result.append ("%N")
+				l_user := user.item
+				Result.append (print_id_name (l_user.get_id, l_user.get_name))
 			end
 		end
 	end
 
 	print_groups: STRING
+	local
+		l_group: GROUP
 	do
 		create Result.make_from_string("  ")
 		Result.append ("Groups:%N")
@@ -256,11 +257,8 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 			across
 				group_list as group
 			loop
-				Result.append ("      ")
-				Result.append (group.key.out)
-				Result.append ("->")
-				Result.append (group.item.get_name)
-				Result.append ("%N")
+				l_group := group.item
+				Result.append (print_id_name (l_group.get_id, l_group.get_name))
 			end
 		end
 	end
@@ -275,7 +273,8 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 			across
 				user_list as user
 			loop
-				if user.item.membership_count > 0 then							-- Print for users that are group members
+				-- Print for users that are group members
+				if user.item.membership_count > 0 then		
 					l_group_print_count := user.item.membership_count
 					Result.append ("      [")
 					Result.append (user.key.out)
@@ -288,7 +287,8 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 						Result.append (group.item.out)
 						Result.append ("->")
 						Result.append (get_group (group.item).get_name)
-						if l_group_print_count > 1 then							-- Deal with ending line for each user
+						-- Deal with ending line for each user
+						if l_group_print_count > 1 then
 							Result.append (", ")
 						else
 							Result.append ("}")
@@ -348,6 +348,16 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 		end
 	end
 
+	print_id_name (a_id: INTEGER_64; a_name: STRING): STRING
+	do
+		create Result.make_empty
+		Result.append ("      ")
+		Result.append (a_id.out)
+		Result.append ("->")
+		Result.append (a_name)
+		Result.append ("%N")
+	end
+	
 	print_message (a_mid: INTEGER_64; a_msg: MESSAGE): STRING
 	local
 		l_string: STRING
@@ -468,11 +478,12 @@ feature {MESSENGER} -- Main Printing Queries
 				Result.append (l_user.get_name)
 				Result.append ("]:%N")
 
-				across																	-- TODO
+				across
 					l_user.get_user_messages as msg
 				loop
 					if msg.item ~ "unread" then
---						Result.append (print_message (msg.key, message_list.at (msg.key)))
+						-- Check this line for correctness (written without IDE)
+						Result.append (print_message (msg.key, get_message (msg.key)))
 					end
 				end
 
@@ -503,7 +514,7 @@ feature {MESSENGER}
 		local
 			l_user: USER
 		do
-			create l_user.make (0, "")				-- VEVI Compiler
+			create l_user.make (0, "")		-- VEVI Compiler
 
 			across
 				user_list as usr
@@ -520,7 +531,7 @@ feature {MESSENGER}
 		local
 			l_group: GROUP
 		do
-			create l_group.make (0, "")				-- VEVI Compiler
+			create l_group.make (0, "")		-- VEVI Compiler
 
 			across
 				group_list as grp
@@ -531,6 +542,23 @@ feature {MESSENGER}
 			end
 
 			Result := l_group
+		end
+	
+	get_message (a_mid: INTEGER_64): MESSAGE
+		local
+			l_message: MESSAGE
+		do
+			create l_message.make (0, 0, "")	-- VEVI Compiler
+			
+			across
+				message_list as msg
+			loop
+				if msg.key = a_mid then
+					l_message := msg.item
+				end
+			end
+			
+			Result := l_message
 		end
 
 ------------------------------------------------------------------------
