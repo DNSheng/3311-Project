@@ -87,7 +87,7 @@ feature
 			loop
 				if msg.item.message.get_message_group = a_gid then
 					get_user (a_uid).add_message (msg.item.message_id)
-					-- Workaround
+					-- Workaround, set to unavailable
 					get_user (a_uid).delete_message (msg.item.message_id)
 				end
 			end
@@ -159,11 +159,11 @@ feature {MESSENGER} -- Printing Commands
 
 	internal_reset
 	do
-		print_state 		:= 1
-		list_user_id		:= 0
-		error_message		:= ""
-		status_message		:= "OK"
-		status_counter		:= status_counter + 1
+		print_state 			:= 1
+		list_user_id			:= 0
+		error_message			:= ""
+		status_message			:= "OK"
+		status_counter			:= status_counter + 1
 	end
 
 feature -- Visible Printing Commands
@@ -321,6 +321,7 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 	end
 
 	print_message_state: STRING
+		-- FIX THIS, only print messages for people who have them
 	local
 		l_mid: INTEGER_64
 		l_user: USER
@@ -335,6 +336,7 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 				across
 					user_list as user
 				loop
+					-- Add an if-statement here
 					l_user := user.item.user
 					Result.append ("      (")
 					Result.append (l_user.get_id.out)
@@ -419,7 +421,7 @@ feature {MESSENGER} -- Main Printing Queries
 			create Result.make_from_string (print_status_message)
 			-- Alphabetically sorted
 			if user_list.count > 0 then
-				-- SORTING 																		TODO
+				-- SORTING 								TODO
 
 				-- LISTING
 				across
@@ -440,7 +442,7 @@ feature {MESSENGER} -- Main Printing Queries
 			create Result.make_from_string (print_status_message)
 			-- Alphabetically sorted
 			if group_list.count > 0 then
-				-- SORTING 																		TODO
+				-- SORTING 								TODO
 
 				-- LISTING
 				across
