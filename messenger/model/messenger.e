@@ -25,19 +25,17 @@ feature {NONE}
 		do
 			-- Printing Attributes
 			status_counter		:= 0
-			print_state		:= 0
+			print_state			:= 0
 			preview_length		:= 15
 			status_message		:= "OK"
 			error_message		:= ""
 
 			-- Model attributes
-			user_list_key		:= 1
-			group_list_key		:= 1
 			message_list_key	:= 1
 
-			create user_list.make (0)
-			create group_list.make (0)
-			create message_list.make (0)
+			create {ARRAYED_LIST[TUPLE [user: USER; user_id: INTEGER_64]]} user_list.make (0)
+			create {ARRAYED_LIST[TUPLE [group: GROUP; group_id: INTEGER_64]]} group_list.make (0)
+			create {ARRAYED_LIST[TUPLE [message: MESSAGE; message_id: INTEGER_64]]} message_list.make (0)
 		end
 
 ------------------------------------------------------------------------
@@ -46,12 +44,10 @@ feature {NONE}
 
 feature {MESSENGER}
 
-	user_list:			HASH_TABLE[USER, INTEGER_64]
-	group_list:			HASH_TABLE[GROUP, INTEGER_64]
-	message_list:			HASH_TABLE[MESSAGE, INTEGER_64]
-	user_list_key:			INTEGER_64
-	group_list_key:			INTEGER_64
 	message_list_key:		INTEGER_64
+	user_list:				LIST[TUPLE [user: USER; user_id: INTEGER_64]]
+	group_list:				LIST[TUPLE [group: GROUP; group_id: INTEGER_64]]
+	message_list:			LIST[TUPLE [message: MESSAGE; message_id: INTEGER_64]]
 
 ------------------------------------------------------------------------
 --MODEL COMMANDS
@@ -69,8 +65,7 @@ feature
 			l_group: GROUP
 		do
 			create l_group.make (a_gid, a_group_name)
-			group_list.put (l_group, a_gid)
-			group_list_key := group_list_key + 1
+			group_list.force (l_group, a_gid)
 		end
 
 	add_user (a_uid: INTEGER_64; a_user_name: STRING)
@@ -78,8 +73,7 @@ feature
 			l_user: USER
 		do
 			create l_user.make (a_uid, a_user_name)
-			user_list.put (l_user, a_uid)
-			user_list_key := user_list_key + 1
+			user_list.force (l_user, a_uid)
 		end
 
 	register_user (a_uid, a_gid: INTEGER_64)
@@ -91,10 +85,10 @@ feature
 			across
 				message_list as msg
 			loop
-				if msg.item.get_message_group = a_gid then
-					get_user (a_uid).add_message (msg.key)
+				if msg.item.message.get_message_group = a_gid then
+					get_user (a_uid).add_message (msg.item.message_id)
 					-- Workaround
-					get_user (a_uid).delete_message (msg.key)
+					get_user (a_uid).delete_message (msg.item.message_id)
 				end
 			end
 		end
@@ -192,8 +186,8 @@ feature -- Visible Printing Commands
 			when 12 then error_message := "Message with this ID not found in old/read messages."
 			when 13 then error_message := "Message length must be greater than zero."
 		end
-		print_state		:= 2
-		status_message		:= "ERROR"
+		print_state				:= 2
+		status_message			:= "ERROR"
 	end
 
 feature -- Visible Printing Queries
@@ -245,7 +239,7 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 			across
 				user_list as user
 			loop
-				l_user := user.item
+				l_user := user.item.user
 				Result.append ("    ")
 				Result.append (print_id_name (l_user.get_id, l_user.get_name))
 			end
@@ -262,7 +256,7 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 			across
 				group_list as group
 			loop
-				l_group := group.item
+				l_group := group.item.group
 				Result.append ("    ")
 				Result.append (print_id_name (l_group.get_id, l_group.get_name))
 			end
@@ -272,6 +266,7 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 	print_registrations: STRING
 	local
 		l_group_print_count: INTEGER
+		l_user: USER
 	do
 		create Result.make_from_string ("  ")
 		Result.append ("Registrations:%N")
@@ -280,15 +275,18 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 				user_list as user
 			loop
 				-- Print for users that are group members
-				if user.item.membership_count > 0 then
-					l_group_print_count := user.item.membership_count
+				l_user := user.item.user
+
+				if l_user.membership_count > 0 then
+					l_group_print_count := l_user.membership_count
 					Result.append ("      [")
-					Result.append (user.key.out)
+					Result.append (user.item.user_id.out)
 					Result.append (", ")
-					Result.append (user.item.get_name)
+					Result.append (l_user.get_name)
 					Result.append ("]->{")
+
 					across
-						user.item.get_memberships as group
+						l_user.get_memberships as group
 					loop
 						Result.append (group.item.out)
 						Result.append ("->")
@@ -301,6 +299,7 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 						end
 						l_group_print_count := l_group_print_count - 1
 					end
+
 					Result.append ("%N")
 				end
 			end
@@ -316,7 +315,7 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 			across
 				message_list as msg
 			loop
-				Result.append (print_message (msg.key, msg.item))
+				Result.append (print_message (msg.item.message_id, msg.item.message))
 			end
 		end
 	end
@@ -324,6 +323,7 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 	print_message_state: STRING
 	local
 		l_mid: INTEGER_64
+		l_user: USER
 	do
 		create Result.make_from_string ("  ")
 		Result.append ("Message state:%N")
@@ -331,19 +331,20 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 			across
 				message_list as msg
 			loop
-				l_mid := msg.key
+				l_mid := msg.item.message_id
 				across
 					user_list as user
 				loop
+					l_user := user.item.user
 					Result.append ("      (")
-					Result.append (user.item.get_id.out)
+					Result.append (l_user.get_id.out)
 					Result.append (", ")
 					Result.append (l_mid.out)
 					Result.append (")->")
 
-					if user.item.message_was_read (l_mid) then
+					if l_user.message_was_read (l_mid) then
 						Result.append ("read")
-					elseif user.item.has_message (l_mid) then
+					elseif l_user.has_message (l_mid) then
 						Result.append ("unread")
 					else
 						Result.append ("unavailable")
@@ -424,7 +425,7 @@ feature {MESSENGER} -- Main Printing Queries
 				across
 					user_list as user
 				loop
-					l_user := user.item
+					l_user := user.item.user
 					Result.append (print_id_name (l_user.get_id, l_user.get_name))
 				end
 			else
@@ -445,7 +446,7 @@ feature {MESSENGER} -- Main Printing Queries
 				across
 					group_list as group
 				loop
-					l_group := group.item
+					l_group := group.item.group
 					Result.append (print_id_name (l_group.get_id, l_group.get_name))
 				end
 			else
@@ -523,8 +524,8 @@ feature {MESSENGER}
 			across
 				user_list as usr
 			loop
-				if usr.key = a_uid then
-					l_user := usr.item
+				if usr.item.user_id = a_uid then
+					l_user := usr.item.user
 				end
 			end
 
@@ -540,8 +541,8 @@ feature {MESSENGER}
 			across
 				group_list as grp
 			loop
-				if grp.key = a_gid then
-					l_group := grp.item
+				if grp.item.group_id = a_gid then
+					l_group := grp.item.group
 				end
 			end
 
@@ -557,8 +558,8 @@ feature {MESSENGER}
 			across
 				message_list as msg
 			loop
-				if msg.key = a_mid then
-					l_message := msg.item
+				if msg.item.message_id = a_mid then
+					l_message := msg.item.message
 				end
 			end
 
@@ -573,7 +574,7 @@ feature {MESSENGER}
 
 	registrations_exist: BOOLEAN
 	do
-		Result := across user_list as user some user.item.get_memberships.count > 0 end
+		Result := across user_list as user some user.item.user.get_memberships.count > 0 end
 	end
 
 ------------------------------------------------------------------------
@@ -589,12 +590,12 @@ feature {ETF_COMMAND}
 
 	is_unused_uid (a_uid: INTEGER_64): BOOLEAN
 	do
-		Result := across user_list as usr all usr.key /= a_uid end
+		Result := across user_list as usr all usr.item.user_id /= a_uid end
 	end
 
 	is_unused_gid (a_gid: INTEGER_64): BOOLEAN
 	do
-		Result := across group_list as grp all grp.key /= a_gid end
+		Result := across group_list as grp all grp.item.group_id /= a_gid end
 	end
 
 	is_valid_name (a_name: STRING): BOOLEAN
@@ -604,12 +605,12 @@ feature {ETF_COMMAND}
 
 	user_exists (a_uid: INTEGER_64): BOOLEAN
 	do
-		Result := across user_list as usr some usr.key = a_uid end
+		Result := across user_list as usr some usr.item.user_id = a_uid end
 	end
 
 	group_exists (a_gid: INTEGER_64): BOOLEAN
 	do
-		Result := across group_list as grp some grp.key = a_gid end
+		Result := across group_list as grp some grp.item.group_id = a_gid end
 	end
 
 	user_is_member (a_uid, a_gid: INTEGER_64): BOOLEAN
@@ -629,7 +630,7 @@ feature {ETF_COMMAND}
 
 	message_exists (a_mid: INTEGER_64): BOOLEAN
 	do
-		Result := message_list.has (a_mid)
+		Result := across message_list as msg some msg.item.message_id = a_mid  end
 	end
 
 	user_authorized_access (a_uid, a_mid: INTEGER_64): BOOLEAN

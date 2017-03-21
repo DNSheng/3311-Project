@@ -4,9 +4,9 @@ A simple messaging program. Current planning is in the docs/ folder.
 
 TODO:
 
-	Finish printing queries and sorting
+	Finish sorting
 		- Sort either before printing or after every entry
-		- Normally print by ID
+		- Normally print sorted by ID
 		- List commands print sorted by Name
 	
 	Contract checks (require, ensure) for every feature/command
