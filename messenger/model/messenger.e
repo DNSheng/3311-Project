@@ -219,23 +219,24 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 
 	print_error_message: STRING
 	do
-		create Result.make_from_string("  ")
+		create Result.make_from_string ("  ")
 		Result.append (error_message)
 	end
 
 	print_status_message: STRING
 	do
-		create Result.make_from_string("  ")
+		create Result.make_from_string ("  ")
 		Result.append (status_counter.out)
 		Result.append (":  ")
 		Result.append (status_message)
+		Result.append ("%N")
 	end
 
 	print_users: STRING
 	local
 		l_user: USER
 	do
-		create Result.make_from_string("  ")
+		create Result.make_from_string ("  ")
 		Result.append ("Users:%N")
 		if user_list.count /= 0 then
 			across
@@ -252,7 +253,7 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 	local
 		l_group: GROUP
 	do
-		create Result.make_from_string("  ")
+		create Result.make_from_string ("  ")
 		Result.append ("Groups:%N")
 		if group_list.count /= 0 then
 			across
@@ -269,7 +270,7 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 	local
 		l_group_print_count: INTEGER
 	do
-		create Result.make_from_string("  ")
+		create Result.make_from_string ("  ")
 		Result.append ("Registrations:%N")
 		if user_list.count /= 0 and registrations_exist then
 			across
@@ -306,7 +307,7 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 	print_all_messages: STRING
 		-- Sorted by default, given how we assign messages IDs based on HASH_TABLE key
 	do
-		create Result.make_from_string("  ")
+		create Result.make_from_string ("  ")
 		Result.append ("All messages:%N")
 		if message_list.count > 0 then
 			across
@@ -321,7 +322,7 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 	local
 		l_mid: INTEGER_64
 	do
-		create Result.make_from_string("  ")
+		create Result.make_from_string ("  ")
 		Result.append ("Message state:%N")
 		if user_list.count > 0 and message_list.count > 0 then
 			across
@@ -352,8 +353,7 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 
 	print_id_name (a_id: INTEGER_64; a_name: STRING): STRING
 	do
-		create Result.make_empty		-- Instead of make_empty, just make ("  ")
-		Result.append ("  ")
+		create Result.make_from_string ("  ")
 		Result.append (a_id.out)
 		Result.append ("->")
 		Result.append (a_name)
@@ -364,8 +364,7 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 	local
 		l_string: STRING
 	do
-		create Result.make_empty		-- Instead of make_empty, just make ("      ")
-		Result.append ("      ")
+		create Result.make_from_string ("      ")
 		Result.append (a_mid.out)
 		Result.append ("->[sender: ")
 		Result.append (a_msg.get_message_sender.out)
@@ -389,16 +388,12 @@ feature {MESSENGER} -- Main Printing Queries
 
 	print_initial_state: STRING
 		do
-			create Result.make_empty
-			Result.append (print_status_message)
-			Result.append ("%N")
+			create Result.make_from_string (print_status_message)
 		end
 
 	print_default_state: STRING
 		do
-			create Result.make_empty
-			Result.append (print_status_message)
-			Result.append ("%N")
+			create Result.make_from_string (print_status_message)
 			Result.append (print_users)
 			Result.append (print_groups)
 			Result.append (print_registrations)
@@ -408,9 +403,7 @@ feature {MESSENGER} -- Main Printing Queries
 
 	print_error_state: STRING
 		do
-			create Result.make_empty
-			Result.append (print_status_message)
-			Result.append ("%N")
+			create Result.make_from_string (print_status_message)
 			Result.append (print_error_message)
 			Result.append ("%N")
 		end
@@ -419,9 +412,7 @@ feature {MESSENGER} -- Main Printing Queries
 		local
 			l_user: USER
 		do
-			create Result.make_empty
-			Result.append (print_status_message)
-			Result.append ("%N")
+			create Result.make_from_string (print_status_message)
 			-- Alphabetically sorted
 			if user_list.count > 0 then
 				-- SORTING 																		TODO
@@ -442,9 +433,7 @@ feature {MESSENGER} -- Main Printing Queries
 		local
 			l_group: GROUP
 		do
-			create Result.make_empty
-			Result.append (print_status_message)
-			Result.append ("%N")
+			create Result.make_from_string (print_status_message)
 			-- Alphabetically sorted
 			if group_list.count > 0 then
 				-- SORTING 																		TODO
@@ -465,9 +454,7 @@ feature {MESSENGER} -- Main Printing Queries
 		local
 			l_user: USER
 		do
-			create Result.make_empty
-			Result.append (print_status_message)
-			Result.append ("%N")
+			create Result.make_from_string (print_status_message)
 
 			l_user := get_user (list_user_id)
 
@@ -494,9 +481,7 @@ feature {MESSENGER} -- Main Printing Queries
 
 	print_list_old_messages: STRING
 		do
-			create Result.make_empty
-			Result.append (print_status_message)
-			Result.append ("%N")
+			create Result.make_from_string (print_status_message)
 --			if  then
 
 --			else
