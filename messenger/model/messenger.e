@@ -25,7 +25,7 @@ feature {NONE}
 		do
 			-- Printing Attributes
 			status_counter		:= 0
-			print_state			:= 0
+			print_state		:= 0
 			preview_length		:= 15
 			status_message		:= "OK"
 			error_message		:= ""
@@ -45,8 +45,8 @@ feature {NONE}
 feature {MESSENGER}
 
 	message_list_key:		INTEGER_64
-	user_list:				LIST[TUPLE [user: USER; user_id: INTEGER_64]]
-	group_list:				LIST[TUPLE [group: GROUP; group_id: INTEGER_64]]
+	user_list:			LIST[TUPLE [user: USER; user_id: INTEGER_64]]
+	group_list:			LIST[TUPLE [group: GROUP; group_id: INTEGER_64]]
 	message_list:			LIST[TUPLE [message: MESSAGE; message_id: INTEGER_64]]
 
 ------------------------------------------------------------------------
@@ -186,8 +186,8 @@ feature -- Visible Printing Commands
 			when 12 then error_message := "Message with this ID not found in old/read messages."
 			when 13 then error_message := "Message length must be greater than zero."
 		end
-		print_state				:= 2
-		status_message			:= "ERROR"
+		print_state		:= 2
+		status_message		:= "ERROR"
 	end
 
 feature -- Visible Printing Queries
@@ -235,7 +235,7 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 	do
 		create Result.make_from_string ("  ")
 		Result.append ("Users:%N")
-		if user_list.count /= 0 then
+		if user_list.count > 0 then
 			across
 				user_list as user
 			loop
@@ -252,7 +252,7 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 	do
 		create Result.make_from_string ("  ")
 		Result.append ("Groups:%N")
-		if group_list.count /= 0 then
+		if group_list.count > 0 then
 			across
 				group_list as group
 			loop
@@ -270,7 +270,7 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 	do
 		create Result.make_from_string ("  ")
 		Result.append ("Registrations:%N")
-		if user_list.count /= 0 and registrations_exist then
+		if user_list.count > 0 and registrations_exist then
 			across
 				user_list as user
 			loop
