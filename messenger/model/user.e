@@ -16,16 +16,17 @@ feature {NONE} -- Initialization
 		do
 				user_id 	:= a_user_id
 				user_name 	:= a_user_name
+				
 				create user_messages.make (0)
 				create {ARRAYED_LIST[INTEGER_64]} membership.make (0)
 		end
 
 feature {USER} -- Features
 
-	user_id:			INTEGER_64
-	user_name: 			STRING
+	user_id:		INTEGER_64
+	user_name: 		STRING
 	user_messages:		HASH_TABLE[STRING, INTEGER_64]
-	membership:			LIST[INTEGER_64]				-- Sort based on IDs
+	membership:		LIST[INTEGER_64]				-- Sort based on IDs
 
 feature -- Visible Queries
 
@@ -62,6 +63,11 @@ feature {MESSENGER} -- Defensive Export Queries
 			Result := across user_messages as msg some msg.item ~ "unread" end
 		end
 
+	has_old_messages: BOOLEAN
+		do
+			Result := across user_messages as msg some msg.item ~ "read" end
+		end
+		
 	get_memberships: LIST[INTEGER_64]
 		do
 			Result := membership
