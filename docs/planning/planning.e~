@@ -70,14 +70,13 @@ Observations:
 		- Normal output is all users that have access to messages
 		- When adding a user to a group that already contains messages:
 			- ERROR 8: Message with this ID unavailable. (for old messsages)
-			
 		- Thus, have 2 structures:
 			- Each user keeps track of what messages are available to them
 			- Each message keeps track of users shared to (accessed through GROUP by group_id)
 				- Each MESSAGE stores shared_group_id, get group through that using get_group (a_gid)
-				
 		- For each message, to the group using the stored group_id in the MESSAGE
 			- List all group members
 			- Each group member contains what messages are available to them
 				- Base reading/deleting/listing/etc. on the structure in the USER
 			
+

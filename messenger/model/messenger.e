@@ -172,7 +172,7 @@ feature -- Visible Printing Commands
 	do
 		inspect a_error_flag
 			when  0 then error_message := "ID must be a positive integer."
-			when  1 then error_message := "ID already in use"
+			when  1 then error_message := "ID already in use."
 			when  2 then error_message := "User name must start with a letter."
 			when  3 then error_message := "Group name must start with a letter."
 			when  4 then error_message := "User with this ID does not exist."
@@ -185,6 +185,8 @@ feature -- Visible Printing Commands
 			when 11 then error_message := "Message has already been read. See 'list_old_messages'."
 			when 12 then error_message := "Message with this ID not found in old/read messages."
 			when 13 then error_message := "Message length must be greater than zero."
+			-- Error_message 14 from the new oracle, not explicitly documented in errors.txt
+			when 14 then error_message := "Message with this ID unavailable."
 		end
 		print_state		:= 2
 		status_message		:= "ERROR"
@@ -232,14 +234,23 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 	print_users: STRING
 	local
 		l_user: USER
+		l_sorted_users: SORTED_TWO_WAY_LIST[INTEGER_64]
 	do
 		create Result.make_from_string ("  ")
 		Result.append ("Users:%N")
 		if user_list.count > 0 then
+			-- SORT
+			create l_sorted_users.make
 			across
 				user_list as user
 			loop
-				l_user := user.item.user
+				l_sorted_users.extend (user.item.user_id)
+			end
+			-- LIST
+			across
+				l_sorted_users as user
+			loop
+				l_user := get_user (user.item)
 				Result.append ("    ")
 				Result.append (print_id_name (l_user.get_id, l_user.get_name))
 			end
@@ -249,14 +260,23 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 	print_groups: STRING
 	local
 		l_group: GROUP
+		l_sorted_groups: SORTED_TWO_WAY_LIST[INTEGER_64]
 	do
 		create Result.make_from_string ("  ")
 		Result.append ("Groups:%N")
 		if group_list.count > 0 then
+			-- SORT
+			create l_sorted_groups.make
 			across
 				group_list as group
 			loop
-				l_group := group.item.group
+				l_sorted_groups.extend (group.item.group_id)
+			end
+			-- LIST
+			across
+				l_sorted_groups as group
+			loop
+				l_group := get_group (group.item)
 				Result.append ("    ")
 				Result.append (print_id_name (l_group.get_id, l_group.get_name))
 			end
@@ -417,17 +437,22 @@ feature {MESSENGER} -- Main Printing Queries
 	print_list_users: STRING
 		local
 			l_user: USER
+			l_sorted_users: SORTED_TWO_WAY_LIST[USER]
 		do
 			create Result.make_from_string (print_status_message)
-			-- Alphabetically sorted
 			if user_list.count > 0 then
-				-- SORTING 								TODO
-
-				-- LISTING
+				-- SORTING
+				create l_sorted_users.make
 				across
 					user_list as user
 				loop
-					l_user := user.item.user
+					l_sorted_users.extend (user.item.user)
+				end
+				-- LISTING
+				across
+					l_sorted_users as user
+				loop
+					l_user := user.item
 					Result.append (print_id_name (l_user.get_id, l_user.get_name))
 				end
 			else
@@ -438,17 +463,22 @@ feature {MESSENGER} -- Main Printing Queries
 	print_list_groups: STRING
 		local
 			l_group: GROUP
+			l_sorted_groups: SORTED_TWO_WAY_LIST[GROUP]
 		do
 			create Result.make_from_string (print_status_message)
-			-- Alphabetically sorted
 			if group_list.count > 0 then
-				-- SORTING 								TODO
-
-				-- LISTING
+				-- SORTING (ALPHABETICALLY)
+				create l_sorted_groups.make
 				across
 					group_list as group
 				loop
-					l_group := group.item.group
+					l_sorted_groups.extend (group.item.group)
+				end
+				-- LISTING
+				across
+					l_sorted_groups as group
+				loop
+					l_group := group.item
 					Result.append (print_id_name (l_group.get_id, l_group.get_name))
 				end
 			else

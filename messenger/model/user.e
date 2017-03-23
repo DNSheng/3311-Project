@@ -7,6 +7,12 @@ note
 class
 	USER
 
+inherit
+	COMPARABLE
+		redefine
+			is_less
+		end
+
 create
 	make
 
@@ -16,7 +22,7 @@ feature {NONE} -- Initialization
 		do
 				user_id 	:= a_user_id
 				user_name 	:= a_user_name
-				
+
 				create user_messages.make (0)
 				create {ARRAYED_LIST[INTEGER_64]} membership.make (0)
 		end
@@ -38,6 +44,11 @@ feature -- Visible Queries
 	get_name: STRING
 		do
 			Result := user_name
+		end
+
+	is_less alias "<" (other: like Current): BOOLEAN
+		do
+			Result := user_name < other.user_name
 		end
 
 feature {MESSENGER} -- Defensive Export Queries
@@ -67,7 +78,7 @@ feature {MESSENGER} -- Defensive Export Queries
 		do
 			Result := across user_messages as msg some msg.item ~ "read" end
 		end
-		
+
 	get_memberships: LIST[INTEGER_64]
 		do
 			Result := membership

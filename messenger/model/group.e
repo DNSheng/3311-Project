@@ -7,6 +7,12 @@ note
 class
 	GROUP
 
+inherit
+	COMPARABLE
+		redefine
+			is_less
+		end
+
 create
 	make
 
@@ -52,6 +58,11 @@ feature -- Visible Queries
 	is_a_member (a_uid: INTEGER_64): BOOLEAN
 		do
 			Result := across group_members as member some member.item = a_uid end
+		end
+
+	is_less alias "<" (other: like CURRENT): BOOLEAN
+		do
+			Result := group_name < other.group_name
 		end
 
 end

@@ -4,10 +4,8 @@ A simple messaging program. Current planning is in the docs/ folder.
 
 TODO:
 
-	Finish sorting
-		- Sort either before printing or after every entry
-		- Normally print sorted by ID
-		- List commands print sorted by Name
+	Fix relationship between users, messages, and groups
+		- Users new to groups have old messages in said group listed as unavailable
 	
 	Contract checks (require, ensure) for every feature/command
 
