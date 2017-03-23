@@ -6,6 +6,7 @@ TODO:
 
 	Fix relationship between users, messages, and groups
 		- Users new to groups have old messages in said group listed as unavailable
+		- Wait for final oracle
 	
 	Contract checks (require, ensure) for every feature/command
 

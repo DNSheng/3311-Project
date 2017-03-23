@@ -80,4 +80,8 @@ Observations:
 			- List all group members
 			- Each group member contains what messages are available to them
 				- Base reading/deleting/listing/etc. on the structure in the USER
-			
+		- PLANNING:
+			- USER sends a message to a group:
+				- message is added to message_list
+				- for print_message_state:
+					- go across user_list, if user is in a group with messages, print association

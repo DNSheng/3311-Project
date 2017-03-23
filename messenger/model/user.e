@@ -32,7 +32,7 @@ feature {USER} -- Features
 	user_id:		INTEGER_64
 	user_name: 		STRING
 	user_messages:		HASH_TABLE[STRING, INTEGER_64]
-	membership:		LIST[INTEGER_64]				-- Sort based on IDs
+	membership:		LIST[INTEGER_64]
 
 feature -- Visible Queries
 
@@ -61,6 +61,11 @@ feature {MESSENGER} -- Defensive Export Queries
 	message_was_read (a_mid: INTEGER_64): BOOLEAN
 		do
 			Result := user_messages.at (a_mid) ~ "read"
+		end
+
+	message_unread (a_mid: INTEGER_64): BOOLEAN
+		do
+			Result := user_messages.at (a_mid) ~ "unread"
 		end
 
 	message_deletable (a_mid: INTEGER_64): BOOLEAN
@@ -94,6 +99,11 @@ feature {MESSENGER} -- Defensive Export Queries
 			Result := membership.count
 		end
 
+	in_group (a_gid: INTEGER_64): BOOLEAN
+		do
+			Result := across membership as grp some grp.item = a_gid  end
+		end
+
 feature -- Visible Commands
 
 	read_message (a_message_id: INTEGER_64)
@@ -108,7 +118,7 @@ feature -- Visible Commands
 
 	delete_message (a_message_id: INTEGER_64)
 		do
-			user_messages.remove (a_message_id)
+			user_messages.at (a_message_id) := "unavailable"
 		end
 
 	add_membership (a_gid: INTEGER_64)

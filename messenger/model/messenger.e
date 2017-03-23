@@ -77,15 +77,19 @@ feature
 		end
 
 	register_user (a_uid, a_gid: INTEGER_64)
+		local
+			l_message: MESSAGE
 		do
+			-- Register user in group
 			get_group (a_gid).register_user (a_uid)
+			-- Let user know they are in a group
 			get_user (a_uid).add_membership (a_gid)
 			-- Add messages from that group to the user
-			-- Nevermind, user should not receive access to old messages
 			across
 				message_list as msg
 			loop
-				if msg.item.message.get_message_group = a_gid then
+				l_message := msg.item.message
+				if l_message.get_message_group = a_gid then
 					get_user (a_uid).add_message (msg.item.message_id)
 					-- Workaround, set to unavailable
 					get_user (a_uid).delete_message (msg.item.message_id)
@@ -96,12 +100,23 @@ feature
 	send_message (a_uid, a_gid: INTEGER_64; a_txt: STRING)
 		local
 			l_message: MESSAGE
+			l_user: USER
 		do
 			create l_message.make (a_uid, a_gid, a_txt)
+			-- Put message in list
 			message_list.force (l_message, message_list_key)
-			get_user (a_uid).add_message (message_list_key)
+			-- Give message access to all users in group
+			across
+				user_list as user
+			loop
+				l_user := user.item.user
+				if l_user.in_group (a_gid) then
+					l_user.add_message (message_list_key)
+				end
+			end
+			-- Set sender of message to have 'read' the message
 			get_user (a_uid).read_message (message_list_key)
-
+			-- Increment message key (message_id)
 			message_list_key := message_list_key + 1
 		end
 
@@ -186,10 +201,11 @@ feature -- Visible Printing Commands
 			when 12 then error_message := "Message with this ID not found in old/read messages."
 			when 13 then error_message := "Message length must be greater than zero."
 			-- Error_message 14 from the new oracle, not explicitly documented in errors.txt
+			-- For messages sent before user joined
 			when 14 then error_message := "Message with this ID unavailable."
 		end
 		print_state		:= 2
-		status_message		:= "ERROR"
+		status_message	:= "ERROR "
 	end
 
 feature -- Visible Printing Queries
@@ -287,6 +303,7 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 	local
 		l_group_print_count: INTEGER
 		l_user: USER
+		l_sorted_groups: SORTED_TWO_WAY_LIST[INTEGER_64]
 	do
 		create Result.make_from_string ("  ")
 		Result.append ("Registrations:%N")
@@ -304,9 +321,16 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 					Result.append (", ")
 					Result.append (l_user.get_name)
 					Result.append ("]->{")
-
+					-- SORT
+					create l_sorted_groups.make
 					across
 						l_user.get_memberships as group
+					loop
+						l_sorted_groups.extend (group.item)
+					end
+					-- LIST
+					across
+						l_sorted_groups as group
 					loop
 						Result.append (group.item.out)
 						Result.append ("->")
@@ -357,21 +381,23 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 					user_list as user
 				loop
 					-- Add an if-statement here
-					l_user := user.item.user
-					Result.append ("      (")
-					Result.append (l_user.get_id.out)
-					Result.append (", ")
-					Result.append (l_mid.out)
-					Result.append (")->")
+					if user.item.user.has_message (l_mid) then
+						l_user := user.item.user
+						Result.append ("      (")
+						Result.append (l_user.get_id.out)
+						Result.append (", ")
+						Result.append (l_mid.out)
+						Result.append (")->")
 
-					if l_user.message_was_read (l_mid) then
-						Result.append ("read")
-					elseif l_user.has_message (l_mid) then
-						Result.append ("unread")
-					else
-						Result.append ("unavailable")
+						if l_user.message_was_read (l_mid) then
+							Result.append ("read")
+						elseif l_user.message_unread (l_mid) then
+							Result.append ("unread")
+						else
+							Result.append ("unavailable")
+						end
+						Result.append ("%N")
 					end
-					Result.append ("%N")
 				end
 			end
 		end
@@ -510,7 +536,7 @@ feature {MESSENGER} -- Main Printing Queries
 				end
 
 			else
-				Result.append ("There are no new messages for this user.%N")
+				Result.append ("  There are no new messages for this user.%N")
 			end
 		end
 
@@ -537,7 +563,7 @@ feature {MESSENGER} -- Main Printing Queries
 					end
 				end
 			else
-				Result.append ("There are no old messages for this user.%N")
+				Result.append ("  There are no old messages for this user.%N")
 			end
 		end
 
@@ -683,6 +709,12 @@ feature {ETF_COMMAND}
 	appropriate_msg_length (a_message: STRING): BOOLEAN
 	do
 		Result := a_message.count > 0
+	end
+
+	message_available (a_uid, a_mid: INTEGER_64): BOOLEAN
+	do
+		Result := get_user (a_uid).message_unread (a_mid) or
+				  get_user (a_uid).message_was_read (a_mid)
 	end
 
 end
