@@ -25,7 +25,7 @@ feature {NONE}
 		do
 			-- Printing Attributes
 			status_counter		:= 0
-			print_state			:= 0
+			print_state		:= 0
 			preview_length		:= 15
 			status_message		:= "OK"
 			error_message		:= ""
@@ -123,7 +123,7 @@ feature
 	read_message (a_uid, a_mid: INTEGER_64)
 		do
 			get_user (a_uid).read_message (a_mid)
-			print_state			:= 7
+			print_state		:= 7
 			list_user_id		:= a_uid
 			list_message_id		:= a_mid
 		end
@@ -207,7 +207,7 @@ feature -- Visible Printing Commands
 			when 13 then error_message := "Message length must be greater than zero."
 			when 14 then error_message := "Message with this ID unavailable."
 		end
-		print_state		:= 2
+		print_state	:= 2
 		status_message	:= "ERROR "
 	end
 
