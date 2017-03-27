@@ -62,7 +62,13 @@ feature -- Visible Queries
 
 	is_less alias "<" (other: like CURRENT): BOOLEAN
 		do
-			Result := group_name < other.group_name
+			if group_name < other.group_name then
+				Result := true
+			elseif group_name ~ other.group_name then
+				Result := group_id < other.group_id
+			else
+				Result := false
+			end
 		end
 
 end

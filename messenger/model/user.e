@@ -48,7 +48,13 @@ feature -- Visible Queries
 
 	is_less alias "<" (other: like Current): BOOLEAN
 		do
-			Result := user_name < other.user_name
+			if user_name < other.user_name then
+				Result := true
+			elseif user_name ~ other.user_name then
+				Result := user_id < other.user_id
+			else
+				Result := false
+			end
 		end
 
 feature {MESSENGER} -- Defensive Export Queries
