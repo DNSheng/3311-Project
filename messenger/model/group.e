@@ -27,8 +27,8 @@ feature {NONE} -- Initialization
 
 feature {GROUP} -- Attributes
 
-	group_id:			INTEGER_64
-	group_name:			STRING
+	group_id:		INTEGER_64
+	group_name:		STRING
 	group_members:		LIST[INTEGER_64]
 
 feature -- Visible Commands
