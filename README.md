@@ -19,7 +19,3 @@ Notes:
 			- get_message_list
 		- Running from GUI didn't give exceptions
 			- Thus, likely an ETF problem
-	
-	The error message for read_message() uses a ` (tilted apostrophe)
-	instead of a ' (straight apostrophe) in the beginning. Fixed to
-	match oracle, but likely a mistake.
