@@ -25,7 +25,7 @@ feature {NONE}
 		do
 			-- Printing Attributes
 			status_counter		:= 0
-			print_state		:= 0
+			print_state			:= 0
 			preview_length		:= 15
 			status_message		:= "OK"
 			error_message		:= ""
@@ -123,6 +123,9 @@ feature
 	read_message (a_uid, a_mid: INTEGER_64)
 		do
 			get_user (a_uid).read_message (a_mid)
+			print_state			:= 7
+			list_user_id		:= a_uid
+			list_message_id		:= a_mid
 		end
 
 	delete_message (a_uid, a_mid: INTEGER_64)
@@ -169,6 +172,7 @@ feature {MESSENGER} -- Printing Attributes
 	status_counter:				INTEGER_64
 	preview_length:				INTEGER_64
 	list_user_id:				INTEGER_64
+	list_message_id:			INTEGER_64
 
 feature {MESSENGER} -- Printing Commands
 
@@ -176,6 +180,7 @@ feature {MESSENGER} -- Printing Commands
 	do
 		print_state 			:= 1
 		list_user_id			:= 0
+		list_message_id			:= 0
 		error_message			:= ""
 		status_message			:= "OK"
 		status_counter			:= status_counter + 1
@@ -197,7 +202,7 @@ feature -- Visible Printing Commands
 			when  8 then error_message := "User not authorized to send messages to the specified group."
 			when  9 then error_message := "Message with this ID does not exist."
 			when 10 then error_message := "User not authorized to access this message."
-			when 11 then error_message := "Message has already been read. See 'list_old_messages'."
+			when 11 then error_message := "Message has already been read. See `list_old_messages'."
 			when 12 then error_message := "Message with this ID not found in old/read messages."
 			when 13 then error_message := "Message length must be greater than zero."
 			-- Error_message 14 from the new oracle, not explicitly documented in errors.txt
@@ -220,13 +225,15 @@ feature -- Visible Printing Queries
 			when 4 then Result := print_list_new_messages
 			when 5 then Result := print_list_old_messages
 			when 6 then Result := print_list_users
+			when 7 then Result := print_read_message
 		end
 		internal_reset
 	end
 
 	out: STRING
 		do
-			Result := print_output
+			create Result.make_from_string (print_initial_state)
+			Result.append (print_output)
 		end
 
 feature {MESSENGER} -- Hidden Printing Query Blocks
@@ -381,8 +388,8 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 					user_list as user
 				loop
 					-- Add an if-statement here
-					if user.item.user.has_message (l_mid) then
-						l_user := user.item.user
+					l_user := user.item.user
+					if l_user.membership_count > 0 then
 						Result.append ("      (")
 						Result.append (l_user.get_id.out)
 						Result.append (", ")
@@ -445,8 +452,7 @@ feature {MESSENGER} -- Main Printing Queries
 
 	print_default_state: STRING
 		do
-			create Result.make_from_string (print_status_message)
-			Result.append (print_users)
+			create Result.make_from_string (print_users)
 			Result.append (print_groups)
 			Result.append (print_registrations)
 			Result.append (print_all_messages)
@@ -455,8 +461,7 @@ feature {MESSENGER} -- Main Printing Queries
 
 	print_error_state: STRING
 		do
-			create Result.make_from_string (print_status_message)
-			Result.append (print_error_message)
+			create Result.make_from_string (print_error_message)
 			Result.append ("%N")
 		end
 
@@ -465,7 +470,7 @@ feature {MESSENGER} -- Main Printing Queries
 			l_user: USER
 			l_sorted_users: SORTED_TWO_WAY_LIST[USER]
 		do
-			create Result.make_from_string (print_status_message)
+			create Result.make_empty
 			if user_list.count > 0 then
 				-- SORTING
 				create l_sorted_users.make
@@ -491,7 +496,7 @@ feature {MESSENGER} -- Main Printing Queries
 			l_group: GROUP
 			l_sorted_groups: SORTED_TWO_WAY_LIST[GROUP]
 		do
-			create Result.make_from_string (print_status_message)
+			create Result.make_empty
 			if group_list.count > 0 then
 				-- SORTING (ALPHABETICALLY)
 				create l_sorted_groups.make
@@ -516,7 +521,7 @@ feature {MESSENGER} -- Main Printing Queries
 		local
 			l_user: USER
 		do
-			create Result.make_from_string (print_status_message)
+			create Result.make_empty
 
 			l_user := get_user (list_user_id)
 
@@ -544,7 +549,7 @@ feature {MESSENGER} -- Main Printing Queries
 		local
 			l_user: USER
 		do
-			create Result.make_from_string (print_status_message)
+			create Result.make_empty
 
 			l_user := get_user (list_user_id)
 
@@ -565,6 +570,26 @@ feature {MESSENGER} -- Main Printing Queries
 			else
 				Result.append ("  There are no old messages for this user.%N")
 			end
+		end
+
+	print_read_message: STRING
+		local
+			l_user: USER
+			l_message: MESSAGE
+		do
+			l_user := get_user (list_user_id)
+			l_message := get_message (list_message_id)
+
+			create Result.make_from_string ("  Message for user [")
+			Result.append (list_user_id.out)
+			Result.append (", ")
+			Result.append (l_user.get_name)
+			Result.append ("]: [")
+			Result.append (list_message_id.out)
+			Result.append (", %"")
+			Result.append (l_message.get_message_content)
+			Result.append ("%"]%N")
+			Result.append (print_default_state)
 		end
 
 ------------------------------------------------------------------------

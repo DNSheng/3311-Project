@@ -3,10 +3,8 @@
 A simple messaging program. Current planning is in the docs/ folder.
 
 TODO:
-
-	Fix relationship between users, messages, and groups
-		- Users new to groups have old messages in said group listed as unavailable
-		- Wait for final oracle
+	
+	Fix 'print_initial_state' occurring twice when starting program
 	
 	Contract checks (require, ensure) for every feature/command
 
@@ -23,3 +21,7 @@ Notes:
 			- get_message_list
 		- Running from GUI didn't give exceptions
 			- Thus, likely an ETF problem
+	
+	The error message for read_message() uses a ` (tilted apostrophe)
+	instead of a ' (straight apostrophe) in the beginning. Fixed to
+	match oracle, but likely a mistake.
