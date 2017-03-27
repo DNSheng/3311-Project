@@ -4,8 +4,6 @@ A simple messaging program. Current planning is in the docs/ folder.
 
 TODO:
 	
-	Fix 'print_initial_state' occurring twice when starting program
-	
 	Contract checks (require, ensure) for every feature/command
 
 	Acceptance Tests (To be done later)

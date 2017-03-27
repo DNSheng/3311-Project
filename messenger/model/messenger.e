@@ -205,8 +205,6 @@ feature -- Visible Printing Commands
 			when 11 then error_message := "Message has already been read. See `list_old_messages'."
 			when 12 then error_message := "Message with this ID not found in old/read messages."
 			when 13 then error_message := "Message length must be greater than zero."
-			-- Error_message 14 from the new oracle, not explicitly documented in errors.txt
-			-- For messages sent before user joined
 			when 14 then error_message := "Message with this ID unavailable."
 		end
 		print_state		:= 2
@@ -232,8 +230,12 @@ feature -- Visible Printing Queries
 
 	out: STRING
 		do
-			create Result.make_from_string (print_initial_state)
-			Result.append (print_output)
+			if status_counter = 0 then
+				create Result.make_from_string (print_output)
+			else
+				create Result.make_from_string (print_initial_state)
+				Result.append (print_output)
+			end
 		end
 
 feature {MESSENGER} -- Hidden Printing Query Blocks
