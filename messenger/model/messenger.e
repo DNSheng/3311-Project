@@ -294,7 +294,7 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 	do
 		create Result.make_from_string ("  ")
 		Result.append ("Groups:%N")
-		
+
 		if group_list.count > 0 then
 			-- SORT
 			create l_sorted_groups.make
@@ -322,7 +322,7 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 	do
 		create Result.make_from_string ("  ")
 		Result.append ("Registrations:%N")
-		
+
 		if user_list.count > 0 and registrations_exist then
 			across
 				user_list as user
@@ -388,33 +388,32 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 	do
 		create Result.make_from_string ("  ")
 		Result.append ("Message state:%N")
-		
+
 		if user_list.count > 0 and message_list.count > 0 then
 			across
 				message_list as msg
 			loop
 				l_mid := msg.item.message_id
-				-- For each message and each user, print if user is in a group
+				-- For each message and each user, print state
 				across
 					user_list as user
 				loop
 					l_user := user.item.user
-					if l_user.membership_count > 0 then
-						Result.append ("      (")
-						Result.append (l_user.get_id.out)
-						Result.append (", ")
-						Result.append (l_mid.out)
-						Result.append (")->")
-						-- Print message state for user
-						if l_user.message_was_read (l_mid) then
-							Result.append ("read")
-						elseif l_user.message_unread (l_mid) then
-							Result.append ("unread")
-						else
-							Result.append ("unavailable")
-						end
-						Result.append ("%N")
+					
+					Result.append ("      (")
+					Result.append (l_user.get_id.out)
+					Result.append (", ")
+					Result.append (l_mid.out)
+					Result.append (")->")
+					-- Print message state for user
+					if l_user.message_was_read (l_mid) then
+						Result.append ("read")
+					elseif l_user.message_unread (l_mid) then
+						Result.append ("unread")
+					else
+						Result.append ("unavailable")
 					end
+					Result.append ("%N")
 				end
 			end
 		end
@@ -481,7 +480,7 @@ feature {MESSENGER} -- Main Printing Queries
 			l_sorted_users: SORTED_TWO_WAY_LIST[USER]
 		do
 			create Result.make_empty
-			
+
 			if user_list.count > 0 then
 				-- SORTING
 				create l_sorted_users.make
@@ -508,7 +507,7 @@ feature {MESSENGER} -- Main Printing Queries
 			l_sorted_groups: SORTED_TWO_WAY_LIST[GROUP]
 		do
 			create Result.make_empty
-			
+
 			if group_list.count > 0 then
 				-- SORTING (ALPHABETICALLY)
 				create l_sorted_groups.make
@@ -601,7 +600,7 @@ feature {MESSENGER} -- Main Printing Queries
 			Result.append (", %"")
 			Result.append (l_message.get_message_content)
 			Result.append ("%"]%N")
-			
+
 			Result.append (print_default_state)
 		end
 
