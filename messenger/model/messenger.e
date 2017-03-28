@@ -125,7 +125,7 @@ feature
 			-- Set message as read
 			get_user (a_uid).read_message (a_mid)
 			-- Prepare variables for printing
-			print_state		:= 7
+			print_state		:= read_message_state
 			list_user_id		:= a_uid
 			list_message_id		:= a_mid
 		end
@@ -142,29 +142,39 @@ feature
 
 	list_groups
 		do
-			print_state := 3
+			print_state := list_groups_state
 		end
 
 	list_new_messages (a_uid: INTEGER_64)
 		do
 			list_user_id := a_uid
-			print_state := 4
+			print_state := list_new_messages_state
 		end
 
 	list_old_messages (a_uid: INTEGER_64)
 		do
 			list_user_id := a_uid
-			print_state := 5
+			print_state := list_old_messages_state
 		end
 
 	list_users
 		do
-			print_state := 6
+			print_state := list_users_state
 		end
 
 ------------------------------------------------------------------------
 --PRINTING
 ------------------------------------------------------------------------
+feature {MESSENGER} -- DEFINE PRINTING STATES
+
+	initial_state:				INTEGER = 0
+	default_state:				INTEGER = 1
+	error_state:				INTEGER = 2
+	list_groups_state:			INTEGER = 3
+	list_new_messages_state:	INTEGER = 4
+	list_old_messages_state:	INTEGER = 5
+	list_users_state:			INTEGER = 6
+	read_message_state:			INTEGER = 7
 
 feature {MESSENGER} -- Printing Attributes
 
@@ -181,7 +191,7 @@ feature {MESSENGER} -- Printing Commands
 	internal_reset
 	do
 		-- Reset printing variables after model prints
-		print_state 			:= 1
+		print_state 			:= default_state
 		list_user_id			:= 0
 		list_message_id			:= 0
 		error_message			:= ""
@@ -210,7 +220,7 @@ feature -- Visible Printing Commands
 			when 13 then error_message := "Message length must be greater than zero."
 			when 14 then error_message := "Message with this ID unavailable."
 		end
-		print_state	:= 2
+		print_state	:= error_state
 		status_message	:= "ERROR "
 	end
 
@@ -219,14 +229,14 @@ feature -- Visible Printing Queries
 	print_output: STRING
 	do
 		inspect print_state
-			when 0 then Result := print_initial_state
-			when 1 then Result := print_default_state
-			when 2 then Result := print_error_state
-			when 3 then Result := print_list_groups
-			when 4 then Result := print_list_new_messages
-			when 5 then Result := print_list_old_messages
-			when 6 then Result := print_list_users
-			when 7 then Result := print_read_message
+			when initial_state				then Result := print_initial_state
+			when default_state				then Result := print_default_state
+			when error_state				then Result := print_error_state
+			when list_groups_state			then Result := print_list_groups
+			when list_new_messages_state	then Result := print_list_new_messages
+			when list_old_messages_state	then Result := print_list_old_messages
+			when list_users_state			then Result := print_list_users
+			when read_message_state			then Result := print_read_message
 		end
 		internal_reset
 	end
@@ -399,7 +409,7 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 					user_list as user
 				loop
 					l_user := user.item.user
-					
+
 					Result.append ("      (")
 					Result.append (l_user.get_id.out)
 					Result.append (", ")
