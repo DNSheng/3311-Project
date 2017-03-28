@@ -752,7 +752,7 @@ feature {ETF_COMMAND}
 	message_available (a_uid, a_mid: INTEGER_64): BOOLEAN
 	do
 		Result := get_user (a_uid).message_unread (a_mid) or
-				  get_user (a_uid).message_was_read (a_mid)
+			  get_user (a_uid).message_was_read (a_mid)
 	end
 
 end
