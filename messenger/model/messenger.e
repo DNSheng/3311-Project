@@ -171,8 +171,8 @@ feature {MESSENGER} -- DEFINE PRINTING STATES
 	default_state:				INTEGER = 1
 	error_state:				INTEGER = 2
 	list_groups_state:			INTEGER = 3
-	list_new_messages_state:	INTEGER = 4
-	list_old_messages_state:	INTEGER = 5
+	list_new_messages_state:		INTEGER = 4
+	list_old_messages_state:		INTEGER = 5
 	list_users_state:			INTEGER = 6
 	read_message_state:			INTEGER = 7
 
@@ -229,14 +229,14 @@ feature -- Visible Printing Queries
 	print_output: STRING
 	do
 		inspect print_state
-			when initial_state				then Result := print_initial_state
-			when default_state				then Result := print_default_state
-			when error_state				then Result := print_error_state
-			when list_groups_state			then Result := print_list_groups
+			when initial_state		then Result := print_initial_state
+			when default_state		then Result := print_default_state
+			when error_state		then Result := print_error_state
+			when list_groups_state		then Result := print_list_groups
 			when list_new_messages_state	then Result := print_list_new_messages
 			when list_old_messages_state	then Result := print_list_old_messages
-			when list_users_state			then Result := print_list_users
-			when read_message_state			then Result := print_read_message
+			when list_users_state		then Result := print_list_users
+			when read_message_state		then Result := print_read_message
 		end
 		internal_reset
 	end
@@ -598,8 +598,8 @@ feature {MESSENGER} -- Main Printing Queries
 			l_user: USER
 			l_message: MESSAGE
 		do
-			l_user := get_user (list_user_id)
-			l_message := get_message (list_message_id)
+			l_user 		:= get_user (list_user_id)
+			l_message 	:= get_message (list_message_id)
 
 			create Result.make_from_string ("  Message for user [")
 			Result.append (list_user_id.out)
