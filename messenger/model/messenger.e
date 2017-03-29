@@ -278,14 +278,14 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 		Result.append ("Users:%N")
 
 		if user_list.count > 0 then
-			-- SORT
+			-- SORTING
 			create l_sorted_users.make
 			across
 				user_list as user
 			loop
 				l_sorted_users.extend (user.item.user_id)
 			end
-			-- LIST
+			-- LISTING
 			across
 				l_sorted_users as user
 			loop
@@ -305,14 +305,14 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 		Result.append ("Groups:%N")
 
 		if group_list.count > 0 then
-			-- SORT
+			-- SORTING
 			create l_sorted_groups.make
 			across
 				group_list as group
 			loop
 				l_sorted_groups.extend (group.item.group_id)
 			end
-			-- LIST
+			-- LISTING
 			across
 				l_sorted_groups as group
 			loop
@@ -334,14 +334,14 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 		Result.append ("Registrations:%N")
 
 		if user_list.count > 0 and registrations_exist then
+			-- SORTING
 			create l_sorted_users.make
-			-- SORT
 			across
 				user_list as user
 			loop
 				l_sorted_users.extend (user.item.user_id)
 			end
-			-- LIST
+			-- LISTING
 			across
 				l_sorted_users as user
 			loop
@@ -355,14 +355,14 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 					Result.append (", ")
 					Result.append (l_user.get_name)
 					Result.append ("]->{")
-					-- SORT
+					-- SORTING
 					create l_sorted_groups.make
 					across
 						l_user.get_memberships as group
 					loop
 						l_sorted_groups.extend (group.item)
 					end
-					-- LIST
+					-- LISTING
 					across
 						l_sorted_groups as group
 					loop
@@ -385,7 +385,7 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 	end
 
 	print_all_messages: STRING
-		-- Sorted by default, given how we message IDs are auto-assigned by message_list_key
+		-- Sorted by default due to auto-assigned message IDs
 	do
 		create Result.make_from_string ("  ")
 		Result.append ("All messages:%N")
@@ -414,14 +414,14 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 			loop
 				l_mid := msg.item.message_id
 				-- For each message and each user, print state
+				-- SORTING
 				create l_sorted_users.make
-				-- SORT
 				across
 					user_list as user
 				loop
 					l_sorted_users.extend (user.item.user_id)
 				end
-				-- LIST
+				-- LISTING
 				across
 					l_sorted_users as user
 				loop
@@ -535,7 +535,7 @@ feature {MESSENGER} -- Main Printing Queries
 			create Result.make_empty
 
 			if group_list.count > 0 then
-				-- SORTING (ALPHABETICALLY)
+				-- SORTING
 				create l_sorted_groups.make
 				across
 					group_list as group
