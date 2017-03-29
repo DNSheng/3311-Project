@@ -61,6 +61,7 @@ feature
 		end
 
 	add_group (a_gid: INTEGER_64; a_group_name: STRING)
+		-- Add a group to the messenger program
 		require
 			positive_gid: is_positive_num (a_gid)
 			unused_gid: is_unused_gid (a_gid)
@@ -75,6 +76,7 @@ feature
 		end
 
 	add_user (a_uid: INTEGER_64; a_user_name: STRING)
+		-- Add a user to the messenger program
 		require
 			positive_uid: is_positive_num (a_uid)
 			unused_uid: is_unused_gid (a_uid)
@@ -89,6 +91,7 @@ feature
 		end
 
 	register_user (a_uid, a_gid: INTEGER_64)
+		-- Make a user a member of a group
 		require
 			valid_ids: is_positive_num (a_uid) and is_positive_num (a_gid)
 			user_exists: user_exists (a_uid)
@@ -118,6 +121,7 @@ feature
 		end
 
 	send_message (a_uid, a_gid: INTEGER_64; a_txt: STRING)
+		-- Have a user send a message to a group
 		require
 			valid_ids: is_positive_num (a_uid) and is_positive_num (a_gid)
 			user_exists: user_exists (a_uid)
@@ -151,6 +155,7 @@ feature
 		end
 
 	read_message (a_uid, a_mid: INTEGER_64)
+		-- Have a user read an unread message they own
 		require
 			valid_ids: is_positive_num (a_uid) and is_positive_num (a_mid)
 			user_exists: user_exists (a_uid)
@@ -170,6 +175,7 @@ feature
 		end
 
 	delete_message (a_uid, a_mid: INTEGER_64)
+		-- Have a user delete a read message
 		require
 			valid_ids: is_positive_num (a_uid) and is_positive_num (a_mid)
 			user_exists: user_exists (a_uid)
@@ -182,6 +188,7 @@ feature
 		end
 
 	set_message_preview (a_n: INTEGER_64)
+		-- Change the preview length for messages in the output
 		require
 			positive_num: is_positive_num (a_n)
 		do
@@ -192,6 +199,7 @@ feature
 		end
 
 	list_groups
+		-- List all groups alphabetically
 		do
 			print_state := list_groups_state
 		ensure
@@ -199,6 +207,7 @@ feature
 		end
 
 	list_new_messages (a_uid: INTEGER_64)
+		-- List all new messages of a user based on message ID
 		require
 			valid_ids: is_positive_num (a_uid)
 			user_exists: user_exists (a_uid)
@@ -210,6 +219,7 @@ feature
 		end
 
 	list_old_messages (a_uid: INTEGER_64)
+		-- List all old messages of a user based on message ID
 		require
 			valid_ids: is_positive_num (a_uid)
 			user_exists: user_exists (a_uid)
@@ -221,6 +231,7 @@ feature
 		end
 
 	list_users
+		-- List all users alphabetically
 		do
 			print_state := list_users_state
 		end
@@ -265,6 +276,7 @@ feature {MESSENGER} -- Printing Commands
 feature -- Visible Printing Commands
 
 	set_error_flag (a_error_flag: INTEGER)
+		-- Select the error message to output
 	do
 		inspect a_error_flag
 			when  0 then error_message := "ID must be a positive integer."
@@ -303,6 +315,7 @@ feature -- Visible Printing Queries
 feature {MESSENGER} -- Hidden Printing Query Blocks
 
 	print_output: STRING
+		-- Change the state of the output
 	do
 		inspect print_state
 			when initial_state		then Result := print_initial_state
@@ -318,12 +331,14 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 	end
 
 	print_error_message: STRING
+		-- Print error message selected in `set_error_flag
 	do
 		create Result.make_from_string ("  ")
 		Result.append (error_message)
 	end
 
 	print_status_message: STRING
+		-- Print status message, default "OK"
 	do
 		create Result.make_from_string ("  ")
 		Result.append (status_counter.out)
@@ -333,6 +348,7 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 	end
 
 	print_users: STRING
+		-- Print list of users sorted by IDs
 	local
 		l_user: USER
 		l_sorted_users: SORTED_TWO_WAY_LIST[INTEGER_64]
@@ -360,6 +376,7 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 	end
 
 	print_groups: STRING
+		-- Print list of groups sorted by IDs
 	local
 		l_group: GROUP
 		l_sorted_groups: SORTED_TWO_WAY_LIST[INTEGER_64]
@@ -387,6 +404,8 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 	end
 
 	print_registrations: STRING
+		-- Print all users sorted by IDs that are members of groups
+		-- Print those groups for each user sorted by ID
 	local
 		l_group_print_count: INTEGER
 		l_user: USER
@@ -509,6 +528,7 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 	end
 
 	print_id_name (a_id: INTEGER_64; a_name: STRING): STRING
+		-- Print a string with ID pointed to a name
 	do
 		create Result.make_from_string ("  ")
 		Result.append (a_id.out)
@@ -518,6 +538,7 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 	end
 
 	print_message (a_mid: INTEGER_64; a_msg: MESSAGE): STRING
+		-- Print a message preview, formatted by preview_length
 	local
 		l_string: STRING
 	do
@@ -544,11 +565,13 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 feature {MESSENGER} -- Main Printing Queries
 
 	print_initial_state: STRING
+		-- Print the status message
 		do
 			create Result.make_from_string (print_status_message)
 		end
 
 	print_default_state: STRING
+		-- Print general overview
 		do
 			create Result.make_from_string (print_users)
 			Result.append (print_groups)
@@ -558,12 +581,14 @@ feature {MESSENGER} -- Main Printing Queries
 		end
 
 	print_error_state: STRING
+		-- Print the error message
 		do
 			create Result.make_from_string (print_error_message)
 			Result.append ("%N")
 		end
 
 	print_list_users: STRING
+		-- List all users sorted alphabetically, then by ID
 		local
 			l_user: USER
 			l_sorted_users: SORTED_TWO_WAY_LIST[USER]
@@ -591,6 +616,7 @@ feature {MESSENGER} -- Main Printing Queries
 		end
 
 	print_list_groups: STRING
+		-- List all groups sorted alphabetically, then by ID
 		local
 			l_group: GROUP
 			l_sorted_groups: SORTED_TWO_WAY_LIST[GROUP]
@@ -618,6 +644,7 @@ feature {MESSENGER} -- Main Printing Queries
 		end
 
 	print_list_new_messages: STRING
+		-- List all new messages of a user sorted by ID
 		local
 			l_user: USER
 		do
@@ -646,6 +673,7 @@ feature {MESSENGER} -- Main Printing Queries
 		end
 
 	print_list_old_messages: STRING
+		-- List all old messages of a user sorted by ID
 		local
 			l_user: USER
 		do
@@ -673,6 +701,7 @@ feature {MESSENGER} -- Main Printing Queries
 		end
 
 	print_read_message: STRING
+		-- Print the message when user wants to read
 		local
 			l_user: USER
 			l_message: MESSAGE
@@ -700,6 +729,7 @@ feature {MESSENGER} -- Main Printing Queries
 feature {MESSENGER}
 
 	get_user (a_uid: INTEGER_64): USER
+		-- Return a user associated with the id
 		local
 			l_user: USER
 		do
@@ -717,6 +747,7 @@ feature {MESSENGER}
 		end
 
 	get_group (a_gid: INTEGER_64): GROUP
+		-- Return a group associated with the id
 		local
 			l_group: GROUP
 		do
@@ -734,6 +765,7 @@ feature {MESSENGER}
 		end
 
 	get_message (a_mid: INTEGER_64): MESSAGE
+		-- Return a message associated with the id
 		local
 			l_message: MESSAGE
 		do
