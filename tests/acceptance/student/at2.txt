@@ -1,0 +1,83 @@
+-- ===============================================
+-- at2.txt: 
+-- Test all error messages that should be
+-- output by the program.
+-- ===============================================
+
+list_new_messages (1)           --user doesn't exist
+list_new_messages (-1)          --uid must be positive
+
+list_old_messages (1)           --user doesn't exist
+list_old_messages (-1)          --uid must be positive
+
+list_groups                     --no groups to list
+list_users                      --no users to list
+
+add_user (-1, "Andrew")         --uid must be positive
+add_user (1, "234")             --invalid name
+add_user (1, "Andrew")          --ok
+add_user (1, "Dan")             --uid already taken
+--add_user (9223372036854775808, "God")   --uid out of bounds
+add_user (9223372036854775807, "Dog")   --ok: upper limit
+add_user (2, "Dan")             --ok
+add_user (3, "Eric")            --ok
+add_user (4, "Simin")           --ok
+
+list_new_messages (1)           --no new messages to list
+list_old_messages (1)           --no old messages to list
+
+add_group (-1, "Group")         --gid must be positive
+add_group (1, "687")            --invalid group name
+add_group (1, "Kewl Guys")      --ok
+add_group (1, "Ballers")        --gid already taken
+add_group (2, "Ballers")        --ok
+--add_group (9223372036854775808, "God")  --gid out of bounds
+add_group (9223372036854775807, "Dog")  --ok: upper limit
+
+register_user(-1,1)             --uid must be positive
+register_user(1,-1)             --gid must be positive
+register_user(1,3)              --no such gid exists
+register_user(100,1)            --no such uid exists
+register_user(1,1)              --ok
+register_user(1,1)              --registration already exists
+register_user(2,1)              --ok
+register_user(3,2)              --ok
+register_user(4,2)              --ok
+--register_user(9223372036854775808,1)    --uid out of bounds
+register_user(9223372036854775807,1)    --ok: upper limit
+
+send_message(-1,1,"hi")         --uid must be positive
+send_message(1,-1,"hi")         --gid must be positive
+send_message(1,1,"")            --message cannot be empty string
+send_message(10,1,"hi")         --user doesn't exist
+send_message(1,10,"hi")         --group doesn't exist
+send_message(1,2,"Nobody can hear me")      --unauthorized send
+send_message(1,1,"Hi Dan")      --ok, mid=1
+send_message(3,2,"Hi Simin")    --ok, mid=2
+send_message(4,2,"Hi Eric")     --ok, mid=3
+--send_message(9223372036854775808,1,"hi")    --uid out of bounds
+send_message(9223372036854775807,1,"Woof")  --ok: upper limit
+
+read_message(-1,1)              --uid must be positive
+read_message(1,-1)              --mid must be positive
+read_message(100,1)             --user doesn't exist
+read_message(2,100)             --message doesn't exist
+read_message(2,2)               --message not available, different group
+register_user(1,2)              --ok: add Andrew to group 2
+read_message(1,2)               --message not available, joined group too late
+read_message(2,1)               --ok: Dan reads message in group 1
+read_message(2,1)               --message already read, see list_old_messages
+read_message(1,1)               --message already read, user sent this message
+delete_message(3,3)             --message with this ID not found in old/read messages
+read_message(3,3)               --ok: Eric reads message
+delete_message(3,3)				--ok: Eric deletes message
+
+delete_message(-1,1)            --uid must be positive
+delete_message(1,-1)            --mid must be positive
+delete_message(100,1)           --uid doesn't exist
+delete_message(1,100)           --message doesn't exist
+delete_message(1,3)             --cannot delete message, no access to it
+delete_message(3,3)             --message already deleted
+
+set_message_preview(-1)         --mid must be positive
+set_message_preview(25)         --ok
