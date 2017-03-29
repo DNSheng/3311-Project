@@ -1,0 +1,49 @@
+-- A set of default tests to check functionality
+add_user(1, "John")
+add_user(3, "Spacey")
+add_user(2, "Martin")
+add_user(10, "Deborah")
+add_user(4, "Gruff")
+add_user(7, "Mary")
+add_user(6, "Doc")
+
+add_group(1, "Doctors")
+add_group(2, "Surgeons")
+add_group(3, "Nurses")
+add_group(4, "Staff")
+add_group(5, "Patients")
+
+register_user(6, 1)
+register_user(4, 4)
+register_user(6, 2)
+register_user(1, 5)
+register_user(2, 1)
+register_user(2, 2)
+register_user(3, 3)
+register_user(10, 3)
+register_user(7, 5)
+
+send_message(6, 1, "Hello doctors")
+send_message(1, 5, "I'm thirsty")
+send_message(3, 3, "Don't give John anything to drink before surgery")
+read_message(10, 3)
+send_message(10, 3, "Okay")
+send_message(1, 5, "Need water...so dry...")
+register_user(2, 3)
+send_message(2, 3, "Prep John for surgery")
+list_new_messages(3)
+read_message(3, 6)
+list_new_messages(10)
+read_message(10, 6)
+send_message(6, 1, "Surgery went well, John will recover in time.")
+send_message(2, 1, "I may have accidentally left a scalpel in John.")
+list_new_messages(6)
+read_message(6, 8)
+delete_message(6, 8)
+
+set_message_preview(30)
+
+list_old_messages(10)
+
+list_users
+list_groups
