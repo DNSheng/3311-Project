@@ -688,8 +688,11 @@ feature {MESSENGER}
 feature {ETF_COMMAND}
 
 	is_positive_num (a_num: INTEGER_64): BOOLEAN
+	local
+		zero: INTEGER
 	do
-		Result := a_num.as_integer_32 > 0
+		create zero.make_from_reference (0)
+		Result := a_num > zero.as_integer_64
 	end
 
 	is_unused_uid (a_uid: INTEGER_64): BOOLEAN
