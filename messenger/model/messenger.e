@@ -61,22 +61,39 @@ feature
 		end
 
 	add_group (a_gid: INTEGER_64; a_group_name: STRING)
+		require
+			positive_gid: is_positive_num (a_gid)
+			unused_gid: is_unused_gid (a_gid)
+			valid_group_name: is_valid_name (a_group_name)
 		local
 			l_group: GROUP
 		do
 			create l_group.make (a_gid, a_group_name)
 			group_list.force (l_group, a_gid)
+		ensure
+			group_added: group_list.count = old group_list.count + 1
 		end
 
 	add_user (a_uid: INTEGER_64; a_user_name: STRING)
+		require
+			positive_uid: is_positive_num (a_uid)
+			unused_uid: is_unused_gid (a_uid)
+			valid_user_name: is_valid_name (a_user_name)
 		local
 			l_user: USER
 		do
 			create l_user.make (a_uid, a_user_name)
 			user_list.force (l_user, a_uid)
+		ensure
+			user_added: user_list.count = old user_list.count + 1
 		end
 
 	register_user (a_uid, a_gid: INTEGER_64)
+		require
+			valid_ids: is_positive_num (a_uid) and is_positive_num (a_gid)
+			user_exists: user_exists (a_uid)
+			group_exists: group_exists (a_gid)
+			not_already_member: not user_is_member (a_uid, a_gid)
 		local
 			l_message: MESSAGE
 		do
@@ -95,9 +112,18 @@ feature
 					get_user (a_uid).delete_message (msg.item.message_id)
 				end
 			end
+		ensure
+			group_knows: get_group (a_gid).is_a_member (a_uid)
+			user_knows: get_user (a_uid).in_group (a_gid)
 		end
 
 	send_message (a_uid, a_gid: INTEGER_64; a_txt: STRING)
+		require
+			valid_ids: is_positive_num (a_uid) and is_positive_num (a_gid)
+			user_exists: user_exists (a_uid)
+			group_exists: group_exists (a_gid)
+			message_length: appropriate_msg_length (a_txt)
+			user_authorized: user_authorized_send (a_uid, a_gid)
 		local
 			l_message: MESSAGE
 			l_user: USER
@@ -118,9 +144,20 @@ feature
 			get_user (a_uid).read_message (message_list_key)
 			-- Increment message key (message_id)
 			message_list_key := message_list_key + 1
+		ensure
+			message_sent: message_list_key = old message_list_key + 1
+			message_sent2: message_list.count = old message_list.count + 1
+			sender_has_msg: get_user (a_uid).has_message (old message_list_key)
 		end
 
 	read_message (a_uid, a_mid: INTEGER_64)
+		require
+			valid_ids: is_positive_num (a_uid) and is_positive_num (a_mid)
+			user_exists: user_exists (a_uid)
+			msg_exists: message_exists (a_mid)
+			user_access: user_authorized_access (a_uid, a_mid)
+			msg_available: message_available (a_uid, a_mid)
+			msg_unread: not message_was_read (a_uid, a_mid)
 		do
 			-- Set message as read
 			get_user (a_uid).read_message (a_mid)
@@ -128,33 +165,59 @@ feature
 			print_state		:= read_message_state
 			list_user_id		:= a_uid
 			list_message_id		:= a_mid
+		ensure
+			msg_read: message_was_read (a_uid, a_mid)
 		end
 
 	delete_message (a_uid, a_mid: INTEGER_64)
+		require
+			valid_ids: is_positive_num (a_uid) and is_positive_num (a_mid)
+			user_exists: user_exists (a_uid)
+			msg_exists: message_exists (a_mid)
+			msg_deletable: message_deletable (a_uid, a_mid)
 		do
 			get_user (a_uid).delete_message (a_mid)
+		ensure
+			msg_deleted: not message_deletable (a_uid, a_mid)
 		end
 
 	set_message_preview (a_n: INTEGER_64)
+		require
+			positive_num: is_positive_num (a_n)
 		do
 			preview_length := a_n
+		ensure
+			length_changed: preview_length /= old preview_length
+			length_changed2: preview_length = a_n
 		end
 
 	list_groups
 		do
 			print_state := list_groups_state
+		ensure
+			state_change: print_state = list_groups_state
 		end
 
 	list_new_messages (a_uid: INTEGER_64)
+		require
+			valid_ids: is_positive_num (a_uid)
+			user_exists: user_exists (a_uid)
 		do
 			list_user_id := a_uid
 			print_state := list_new_messages_state
+		ensure
+			state_change: print_state = list_new_messages_state
 		end
 
 	list_old_messages (a_uid: INTEGER_64)
+		require
+			valid_ids: is_positive_num (a_uid)
+			user_exists: user_exists (a_uid)
 		do
 			list_user_id := a_uid
 			print_state := list_old_messages_state
+		ensure
+			state_change: print_state = list_old_messages_state
 		end
 
 	list_users
@@ -702,7 +765,7 @@ feature {MESSENGER}
 --DEFENSIVE CHECKS
 ------------------------------------------------------------------------
 
-feature {ETF_COMMAND}
+feature
 
 	is_positive_num (a_num: INTEGER_64): BOOLEAN
 	local

@@ -2,11 +2,7 @@
 
 A simple messaging program. Current planning is in the docs/ folder.
 
-TODO:
-	
-	Contract checks (require, ensure) for every feature/command
-
-	Acceptance Tests (To be done later)
+Currently matches oracle (as of March 28) and thus considered finished.
 
 Notes:
 
