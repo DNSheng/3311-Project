@@ -327,22 +327,31 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 	local
 		l_group_print_count: INTEGER
 		l_user: USER
+		l_sorted_users: SORTED_TWO_WAY_LIST[INTEGER_64]
 		l_sorted_groups: SORTED_TWO_WAY_LIST[INTEGER_64]
 	do
 		create Result.make_from_string ("  ")
 		Result.append ("Registrations:%N")
 
 		if user_list.count > 0 and registrations_exist then
+			create l_sorted_users.make
+			-- SORT
 			across
 				user_list as user
 			loop
+				l_sorted_users.extend (user.item.user_id)
+			end
+			-- LIST
+			across
+				l_sorted_users as user
+			loop
 				-- Print for users that are group members
-				l_user := user.item.user
+				l_user := get_user (user.item)
 
 				if l_user.membership_count > 0 then
 					l_group_print_count := l_user.membership_count
 					Result.append ("      [")
-					Result.append (user.item.user_id.out)
+					Result.append (user.item.out)
 					Result.append (", ")
 					Result.append (l_user.get_name)
 					Result.append ("]->{")
@@ -394,6 +403,7 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 	local
 		l_mid: INTEGER_64
 		l_user: USER
+		l_sorted_users: SORTED_TWO_WAY_LIST[INTEGER_64]
 	do
 		create Result.make_from_string ("  ")
 		Result.append ("Message state:%N")
@@ -404,11 +414,18 @@ feature {MESSENGER} -- Hidden Printing Query Blocks
 			loop
 				l_mid := msg.item.message_id
 				-- For each message and each user, print state
+				create l_sorted_users.make
+				-- SORT
 				across
 					user_list as user
 				loop
-					l_user := user.item.user
-
+					l_sorted_users.extend (user.item.user_id)
+				end
+				-- LIST
+				across
+					l_sorted_users as user
+				loop
+					l_user := get_user (user.item)
 					Result.append ("      (")
 					Result.append (l_user.get_id.out)
 					Result.append (", ")
