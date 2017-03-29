@@ -22,10 +22,10 @@ feature -- command
 				model.set_error_flag (4)
 			elseif not model.message_exists (mid) then
 				model.set_error_flag (9)
-			elseif not model.message_available (uid, mid) then
-				model.set_error_flag (14)
 			elseif not model.user_authorized_access (uid, mid) then
 				model.set_error_flag (10)
+			elseif not model.message_available (uid, mid) then
+				model.set_error_flag (14)
 			elseif model.message_was_read (uid, mid) then
 				model.set_error_flag (11)
 			else

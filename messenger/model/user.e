@@ -76,8 +76,7 @@ feature {MESSENGER} -- Defensive Export Queries
 
 	message_deletable (a_mid: INTEGER_64): BOOLEAN
 		do
-			Result := user_messages.at (a_mid) ~ "read" or
-				  user_messages.at (a_mid) ~ "unread"
+			Result := user_messages.at (a_mid) ~ "read"
 		end
 
 	has_new_messages: BOOLEAN
