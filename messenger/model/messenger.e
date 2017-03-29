@@ -226,6 +226,19 @@ feature -- Visible Printing Commands
 
 feature -- Visible Printing Queries
 
+	out: STRING
+		do
+			-- If-statement fixes double printing of initial_state at start
+			if status_counter = 0 then
+				create Result.make_from_string (print_output)
+			else
+				create Result.make_from_string (print_initial_state)
+				Result.append (print_output)
+			end
+		end
+
+feature {MESSENGER} -- Hidden Printing Query Blocks
+
 	print_output: STRING
 	do
 		inspect print_state
@@ -240,20 +253,6 @@ feature -- Visible Printing Queries
 		end
 		internal_reset
 	end
-
-	out: STRING
-		do
-			-- If-statement fixes double printing of initial_state at start
-			if status_counter = 0 then
-				create Result.make_from_string (print_output)
-			else
-				create Result.make_from_string (print_initial_state)
-				Result.append (print_output)
-			end
-		end
-
-feature {MESSENGER} -- Hidden Printing Query Blocks
-
 
 	print_error_message: STRING
 	do
@@ -672,7 +671,7 @@ feature {MESSENGER}
 		end
 
 ------------------------------------------------------------------------
---INTERNAL INFORMATION COMMANDS
+--INTERNAL INFORMATION QUERIES
 ------------------------------------------------------------------------
 
 feature {MESSENGER}
