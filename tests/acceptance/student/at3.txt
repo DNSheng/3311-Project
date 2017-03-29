@@ -1,0 +1,59 @@
+-- ==============================================
+-- at3.txt:
+-- Ensure program lists users, groups and
+-- messages in properly sorted order.
+-- ==============================================
+
+add_user(10,"Man")
+add_user(2,"Man")
+add_user(100,"Man")
+add_user(35,"Woman")
+add_user(20,"Woman")
+add_user(10000,"Man")
+add_user(10001,"Ares")
+add_user(10002,"Benjels")
+add_user(10003,"Cathy")
+
+add_group(34,"Banana")
+add_group(33,"Orange")
+add_group(32,"Apple")
+add_group(45,"Andy")
+add_group(44,"Zebra")
+add_group(46,"Zebra")
+add_group(22,"Xylophone")
+
+register_user(10, 34)
+register_user(100, 34)
+register_user(2, 34)
+register_user(10000, 34)
+register_user(35, 34)
+register_user(10002, 34)
+register_user(10, 33)
+register_user(10003, 32)
+register_user(10002, 44)
+register_user(10002, 46)
+register_user(20, 22)
+register_user(10001, 45)
+register_user(2, 32)
+register_user(2, 22)
+register_user(2, 33)
+
+send_message(10, 34, "Good Day M'Lady")
+send_message(100, 34, "Good Day M'Lady")
+send_message(2, 34, "Hello")
+send_message(10002, 34, "C'monnnn Benjeeeells")
+send_message(2, 32, "Sup guys")
+send_message(20, 22, "Hello")
+
+read_message(2, 4)
+read_message(35, 1)
+read_message(100, 1)
+read_message(10000, 4)
+read_message(10003, 5)
+read_message(2, 6)
+
+list_new_messages(2)
+list_old_messages(2)
+
+list_groups
+list_users

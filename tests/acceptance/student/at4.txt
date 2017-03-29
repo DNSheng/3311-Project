@@ -1,0 +1,70 @@
+-- ===========================================
+-- at4.txt:
+-- Test the general, everyday use of the
+-- program to ensure correctness. No boundary
+-- conditions considered.
+-- ===========================================
+
+add_user(1,"Andrew")
+add_user(2,"Dan")
+add_user(3,"Eric")
+add_user(4,"Simin")
+add_user(5,"Mike")
+add_user(6,"Marty")
+add_user(7,"Marco")
+add_user(8,"Marlee")
+
+add_group(1,"Engineers")
+add_group(2,"Soccer Players")
+add_group(3,"My Main Men")
+
+register_user(1,1)
+register_user(2,1)
+register_user(3,1)
+register_user(4,1)
+register_user(1,2)
+register_user(5,2)
+register_user(6,2)
+register_user(7,2)
+register_user(5,3)
+register_user(6,3)
+register_user(7,3)
+register_user(8,3)
+
+list_groups
+list_users
+
+send_message(1,1,"Does anybody else enjoy writing acceptance tests as much as I do?")
+read_message(3,1)
+send_message(3,1,"Yoooo, acceptance tests are the best Yoo.")
+read_message(1,2)
+send_message(1,1,"Eric that was sarcasm...")
+list_new_messages(3)
+
+send_message(4,1,"That last quiz was so hard.")
+read_message(2,4)
+read_message(1,4)
+send_message(2,1,"Oh I think I finished that quiz in like 34 seconds and got 16/17.")
+read_message(4,5)
+read_message(1,5)
+list_old_messages(1)
+delete_message(1,5)
+list_new_messages(1)
+
+set_message_preview(30)
+
+send_message(6,2,"Practice tomorrow at 7PM.")
+read_message(7,6)
+send_message(7,2,"I don't need practice.")
+read_message(1,7)
+read_message(5,6)
+read_message(5,7)
+read_message(6,7)
+list_old_messages(7)
+delete_message(6,7)
+list_old_messages(6)
+
+send_message(8,3,"My mom might make many mittens.")
+list_new_messages(6)
+list_new_messages(7)
+list_new_messages(5)
