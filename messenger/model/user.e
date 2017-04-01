@@ -109,7 +109,7 @@ feature {MESSENGER} -- Defensive Export Queries
 			Result := across membership as grp some grp.item = a_gid  end
 		end
 
-feature -- Visible Commands
+feature {MESSENGER}-- Visible Commands
 
 	read_message (a_message_id: INTEGER_64)
 		do
